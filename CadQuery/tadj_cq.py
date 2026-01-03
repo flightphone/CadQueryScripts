@@ -1,6 +1,8 @@
 import cadquery as cq
 import math
 
+from ocp_vscode import show
+
 #https://cadquery.readthedocs.io/en/latest/_static/cadquery_cheatsheet.html
 
 baseh = 0.532
@@ -29,6 +31,28 @@ def arc(w, h, l):
     return res
 
 
+
+def tower():
+    h1 = 3
+    h2 = 2
+    n = 9
+    res = prism(n, 2, h1)
+    res2 = pyramid(n, 2, h2).translate((0, 0, h1))
+    main_body = res.union(res2)
+    cutter = arc(0.4, 2, 10)
+    for i in range(n):
+        angle = i /n * 360
+        rotated_cutter = cutter.rotate((0,0,0), (0,0,1), angle)
+        main_body = main_body.cut(rotated_cutter)
+
+    return main_body
+
+
+def create_tower():
+    res = tower()
+    #cq.exporters.export(res, './stl/tower.stl')   
+    show(res)
+    print("ok")    
 
 def tadj_onion(r1, al):
     cone_solid = cq.Solid.makeCone(r1*math.cos(al), 0, r1/math.cos(math.pi/2 - al) - r1*math.sin(al))
@@ -218,12 +242,16 @@ def tadj_box():
         box_cut = boxm.rotate((0, 0, 0), (0, 0, 1), i*90)
         box = box.cut(box_cut)
     
-    '''
-    box2 = make_offset(doc, box, -w2/2, "box")
-    box2 = Part.makeCompound([box2])
-    box2.translate(App.Vector(0, 0, h0 - w2/2 - h1))    
+    
+    #box2 = box.shell(-w2, kind="intersection")
+    #box2 = box2.translate((0, 0, h0 - w2/2 - h1))    
+    box2 = box.shell(-w2/2, kind="intersection")
+    box2 = box.cut(box2)
+    box2 = box2.translate((0, 0, h0 - w2/2 - h1))
     box = box.cut(box2)
-    '''
+    # fire,  but not need
+    #box = box.shell(-w2/2, kind="intersection")
+    
 
     for i in range(4):    
         boxa = boxp.rotate((0, 0, 0), (0, 0, 1), i*90)
@@ -304,31 +332,19 @@ def tadj():
 
 
 
-def tower():
-    h1 = 3
-    h2 = 2
-    n = 9
-    res = prism(n, 2, h1)
-    res2 = pyramid(n, 2, h2).translate((0, 0, h1))
-    main_body = res.union(res2)
-    cutter = arc(0.4, 2, 10)
-    for i in range(n):
-        angle = i /n * 360
-        rotated_cutter = cutter.rotate((0,0,0), (0,0,1), angle)
-        main_body = main_body.cut(rotated_cutter)
 
-    return main_body
 
 
 def create_tadj():
     res = tadj()
-    cq.exporters.export(res, './stl/tadj.stl')   
+    #cq.exporters.export(res, './stl/tadj.stl')   
+    show(res)
     print("ok")
 
-def create_tower():
-    res = tower()
-    cq.exporters.export(res, './stl/tower.stl')   
-    print("ok")    
 
-create_tadj()
-#create_tower()
+
+#create_tadj()
+create_tower()
+
+
+
