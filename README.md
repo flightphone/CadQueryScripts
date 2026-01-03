@@ -8,3 +8,7 @@ tower
 
 basilica
 ![Basilica](img/basilica.png)
+
+
+stair
+![stair](img/stair.png)

@@ -99,10 +99,10 @@ def basi():
     cy = cy.union(sp)
     
     for i in range(4):
-            ruf = ruf.rotate((0, 0, 0), (0, 0, 1), 90)
-            res = res.union(ruf)
-            arc4 = arc4.rotate((0, 0, 0),(0, 0, 1), 90)
-            cy = cy.cut(arc4)    
+        ruf = ruf.rotate((0, 0, 0), (0, 0, 1), 90)
+        res = res.union(ruf)
+        arc4 = arc4.rotate((0, 0, 0),(0, 0, 1), 90)
+        cy = cy.cut(arc4)    
     
     res = res.union(cy)
     cy2 = cq.Workplane("XY").cylinder(0.1, r0+d2).translate((0, 0, h3 + 0.5))

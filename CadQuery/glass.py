@@ -70,9 +70,9 @@ def pot():
     #res = res.makeFillet(1, [res.Edges[2], res.Edges[4]])
     return res            
 
-#res = glass()
+res = glass()
 #cq.exporters.export(res, './stl/glass.stl')   
-res = pot()
+#res = pot()
 show(res)
 #cq.exporters.export(res, './stl/pot.stl')   
 print("ok!!!")
