@@ -3,17 +3,18 @@ from ocp_vscode import show
 
 def stair():
     # helix parametrs
-    r = 6      # radius
-    p = 20       # pitch
+    r = 8    # radius
+    p = 40       # pitch
     h = 40      # 
-    hs = 2.5
+    hs = 2.5 
     alf = 360/p * hs
     r1 = 2
 
     ax = cq.Workplane("XY").cylinder(height=h + hs, radius = r1).translate((0, 0, (h + hs)/2 - hs / 2))
-    step = cq.Workplane("XY").cylinder(height=hs, radius = (2*r - r1 + 0.01), angle=alf).rotate((0, 0, 0), (0, 0, 1), -alf)
+    step = cq.Workplane("XY").cylinder(height=hs - 0.01, radius = (2*r - r1 + 0.01), angle=alf).rotate((0, 0, 0), (0, 0, 1), -alf)
     n = int(h / hs)
-    steps = [step.rotate((0, 0, 0), (0, 0, 1), i* alf).translate((0, 0, i * hs))  for i in range(n + 1)]
+    steps = [step.rotate((0, 0, 0), (0, 0, 1), i* alf).translate((0, 0, i * hs)).val()  for i in range(n + 1)]
+    steps_union = cq.Workplane("XY").add(steps).union()
 
     # helix trace
     helix = cq.Wire.makeHelix(pitch=p, height=h, radius=r)
@@ -26,11 +27,10 @@ def stair():
         .sweep(cq.Workplane(obj=helix), isFrenet=True)
     )
     
-    for s in steps:
-        ax = ax.union(s)
+    ax = ax.union(steps_union)
     ax = ax.union(strip)
     return ax
 
 res = stair()    
 show(res)
-cq.exporters.export(res, './stl/stair.stl')
+cq.exporters.export(res, './stl/stair.stl')   
