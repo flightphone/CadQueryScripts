@@ -1,9 +1,9 @@
 import cadquery as cq
 import math
-
 from ocp_vscode import show
 
 #https://cadquery.readthedocs.io/en/latest/_static/cadquery_cheatsheet.html
+#https://sketchfab.com/3d-models/taj-mahal-5b5721f3244241c99f58a34b2fe5fadf
 
 baseh = 0.532
 basew0 = 0.98

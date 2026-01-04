@@ -12,3 +12,7 @@ basilica
 
 stair
 ![stair](img/stair.png)
+
+
+hyperboloids
+![stair](img/hyper.png)
