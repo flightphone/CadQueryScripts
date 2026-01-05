@@ -31,10 +31,11 @@ def basi():
     aPnt4=(w/2,  h)
     aPnt5=(w/2 + d, h)
 
+    '''
     aSegment1=cq.Workplane("XZ").moveTo(aPnt1[0], aPnt1[1]).lineTo(aPnt2[0], aPnt2[1])
     aSegment2=cq.Workplane("XZ").moveTo(aPnt4[0], aPnt4[1]).lineTo(aPnt5[0], aPnt5[1])
     aArcOfCircle = cq.Workplane("XZ").moveTo(aPnt2[0], aPnt2[1]).threePointArc(aPnt3, aPnt4)
-    
+    '''
     aWire = (cq.Workplane("XZ").moveTo(aPnt1[0], aPnt1[1]).lineTo(aPnt2[0], aPnt2[1])
              .threePointArc(aPnt3, aPnt4)
              .lineTo(aPnt5[0], aPnt5[1])
