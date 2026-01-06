@@ -33,4 +33,4 @@ def stair():
 
 res = stair()    
 show(res)
-cq.exporters.export(res, './stl/stair.stl')   
+cq.exporters.export(res, './stl/stair.step')   

@@ -118,7 +118,7 @@ def basi():
     
 
 res = basi()
-#cq.exporters.export(res, './stl/basilica.stl')   
+#cq.exporters.export(res, './stl/basilica.step')   
 show(res)
 print("ok")
 

@@ -71,7 +71,7 @@ def pot():
     return res            
 
 res = glass()
-#cq.exporters.export(res, './stl/glass.stl')   
+cq.exporters.export(res, './stl/glass.step')   
 #res = pot()
 show(res)
 #cq.exporters.export(res, './stl/pot.stl')   
