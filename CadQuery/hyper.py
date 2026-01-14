@@ -14,7 +14,7 @@ def ring (r, w):
 
 def hyp():
     r = 8   #big radius
-    w = 0.1 # radius edge
+    w = 0.15 # radius edge
     n = 22  #count lines
     n2 = 4  #section
     h = 16  #height hyperboloid
@@ -35,9 +35,9 @@ def hyp():
     steps.append(ring3.val())
     res1 = cq.Compound.makeCompound(steps)
 
-    steps2 = [res1, res1.translate((0, 0, h)), res1.translate((0, 0, -h))]
-    res2 = cq.Compound.makeCompound(steps2)
-    return res2
+    #steps2 = [res1, res1.translate((0, 0, h)), res1.translate((0, 0, -h))]
+    #res2 = cq.Compound.makeCompound(steps2)
+    return res1
     
 
 

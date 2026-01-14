@@ -50,3 +50,4 @@ def umbre():
 
 res = umbre()
 show(res)
+cq.exporters.export(res, './stl/umbr.stl')  
