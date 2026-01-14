@@ -59,7 +59,7 @@ def voronoi(l, w, h, nx, ny, nz):
 
 
 
-text = "TP"
+text = "USSR"
 
 letters = cq.Workplane("XY").text(text, 20, 5, valign="bottom", halign="left").combine().val()
 bx = letters.BoundingBox()
@@ -87,7 +87,9 @@ for cell in voronoi_cells:
 
 assembly = cq.Assembly()
 for i, shard in enumerate(shards):
-    assembly.add(shard, name=f"shard_{i}")
+    vv = random.random()
+    if (vv < 0.6):
+        assembly.add(shard, name=f"shard_{i}")
 
 
 assembly.save("./stl/cracked_text.gltf", exportType="GLTF")
