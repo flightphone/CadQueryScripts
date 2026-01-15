@@ -56,16 +56,16 @@ def voronoi(l, w, h, nx, ny, nz):
     return results
 
 
-def voronoi_cube(nx, ny, nz, dx = 1):
-    l = nx*dx
-    w = ny*dx
-    h = nz*dx
+def voronoi_cube(nx, ny, nz, ddx = 1):
+    l = nx*ddx
+    w = ny*ddx
+    h = nz*ddx
     
     av = [[[(0, 0, 0) for _ in range(nz)]  for _ in range(ny)] for _ in range(nx)]
 
-    sx = dx
-    sy = dx
-    sz = dx
+    sx = ddx
+    sy = ddx
+    sz = ddx
     #this algoritm for sx = sy = sz = dx
 
     for x in range(nx):
@@ -90,6 +90,7 @@ def voronoi_cube(nx, ny, nz, dx = 1):
             for iz in range(nz):
                 a0 = av[ix][iy][iz]
                 res = cq.Workplane("XY").box(l, w, h, centered=False).val()
+                
                 #For Cube Only where sx = sy = sz
                 for x in range(5):  #nx
                     for y in range(5): #ny
@@ -127,6 +128,7 @@ def voronoi_cube(nx, ny, nz, dx = 1):
 def craked_text(text, level) -> cq.Assembly:
     
     letters = cq.Workplane("XY").text(text, 20, 5, valign="bottom", halign="left").combine().val()
+    
     bx = letters.BoundingBox()
     letters = letters.translate((-bx.xmin, -bx.ymin, -bx.zmin))
     bx = letters.BoundingBox()
@@ -171,13 +173,38 @@ def craked_cube(nx, ny, nz, level = 1):
             assembly.add(shard, name=f"shard_{i}")
     return assembly        
 
+
+def show_shell():
+    voronoi_cells = voronoi_cube(3, 3, 3)  #125 - 35, 46 sec
+    stouns = []
+    for i, e in enumerate(voronoi_cells):
+        if i!=13:
+            continue    
+        wp = cq.Workplane("XY")
+        stoun = wp.add(e)
+        stouns.append(stoun.val())
+    show(stouns)
+    
+
+
+
+def show_text():
+    assembly = craked_text("GREEK", 0.6) #55
+    assembly.save("./stl/cracked_text6.gltf", exportType="GLTF")
+    show(assembly)
+
+def show_cube():    
+    assembly = craked_cube(5, 10, 2, 0.8) #120 - 24 sec, 125 - 35sec, 240 - 65, 480 - 101 sec, 208 
+    #assembly = craked_cube(5, 5, 2) # 16 sec
+    assembly.save("./stl/cracked_cube5.gltf", exportType="GLTF")
+    show(assembly)
+    
+
+
 import time
-
 start = time.time()
-assembly = craked_text("GREEK", 1) #50
-assembly.save("./stl/cracked_text3.gltf", exportType="GLTF")
-#assembly = craked_cube(12, 10, 4) #120 - 24 sec, 125 - 35sec, 240 - 65, 480 - 101 sec, 208 
-#assembly = craked_cube(15, 15, 1) # 16 sec
-
+#show_text()
+show_cube()
+#show_shell()
 print(f"run: {time.time() - start} sec")  
-show(assembly)
+
