@@ -98,5 +98,8 @@ def but():
 
 res = but()
 #res = tile(1)
-cq.exporters.export(res, './stl/bottom.step')   
-show(res)
+#cq.exporters.export(res, './stl/bottom.step')   
+ass = cq.Assembly()
+ass.add(res)
+ass.export('./stl/taj_bottom.glb')
+show(ass)

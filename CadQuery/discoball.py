@@ -11,7 +11,7 @@ def um_add2(z, z0, d, d0,  n) -> cq.Workplane:
     )
     return res.val()
 
-def discobol():
+def discoball():
     n = 20
     nn = 13
     r = 4
@@ -32,8 +32,10 @@ def discobol():
     return res
     
 
-res = discobol()
-show(res)    
-#cq.exporters.export(res, './stl/discobol.stl')
+res = discoball()
+ass = cq.Assembly()
+ass.add(res)
+ass.export('./stl/disco.glb')
+show(ass)
     
 

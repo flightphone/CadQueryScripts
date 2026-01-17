@@ -43,7 +43,12 @@ def hyp():
 
 
 res = hyp()
-show(res)
+#show(res)
 #res.export('stl/hyper.step')
-#cq.exporters.export(res, './stl/hyper.stl')   
+ass = cq.Assembly()
+ass.add(res)
+ass.export('./stl/hyper.glb')
+show(ass)
+ 
+
 

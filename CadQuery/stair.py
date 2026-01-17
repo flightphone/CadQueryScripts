@@ -17,7 +17,7 @@ def stair():
     steps_union = cq.Workplane("XY").add(steps).union()
 
     # helix trace
-    helix = cq.Wire.makeHelix(pitch=p, height=h, radius=r)
+    helix = cq.Wire.makeHelix(pitch=p, height=h - 0.01, radius=r - 0.05)
 
     # profile
     strip = (
@@ -26,11 +26,13 @@ def stair():
         .rect(2.*(r-r1), hs)
         .sweep(cq.Workplane(obj=helix), isFrenet=True)
     )
-    
-    ax = ax.union(steps_union)
-    ax = ax.union(strip)
-    return ax
+    ass = cq.Assembly()
+    ass.add(ax.val(), name="Column", color=cq.Color("gold"))
+    ass.add(steps_union.val(), name="steps", color=cq.Color("burlywood3"))
+    ass.add(strip.val(), name="strip", color=cq.Color("deeppink"))
+    return ass
 
 res = stair()    
+res.export('./stl/stair.glb')
 show(res)
-cq.exporters.export(res, './stl/stair.step')   
+#cq.exporters.export(res, './stl/stair.step')   

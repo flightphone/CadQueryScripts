@@ -189,22 +189,22 @@ def show_shell():
 
 
 def show_text():
-    assembly = craked_text("GREEK", 0.6) #55
-    assembly.save("./stl/cracked_text6.gltf", exportType="GLTF")
+    assembly = craked_text("USSR", 0.6) #55
+    assembly.export("./stl/cracked_text.glb")
     show(assembly)
 
 def show_cube():    
     assembly = craked_cube(5, 10, 2, 0.8) #120 - 24 sec, 125 - 35sec, 240 - 65, 480 - 101 sec, 208 
     #assembly = craked_cube(5, 5, 2) # 16 sec
-    assembly.save("./stl/cracked_cube5.gltf", exportType="GLTF")
+    assembly.export("./stl/cracked_cube.glb")
     show(assembly)
     
 
 
 import time
 start = time.time()
-#show_text()
-show_cube()
+show_text()
+#show_cube()
 #show_shell()
 print(f"run: {time.time() - start} sec")  
 

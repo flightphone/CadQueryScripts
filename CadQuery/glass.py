@@ -71,8 +71,12 @@ def pot():
     return res            
 
 res = glass()
-cq.exporters.export(res, './stl/glass.step')   
+assembly = cq.Assembly()
+assembly.add(res.val(), name=f"glass")
+assembly.export("./stl/glasss.glb")
+show(assembly)
+#cq.exporters.export(res, './stl/glass.step')   
 #res = pot()
-show(res)
+#show(res)
 #cq.exporters.export(res, './stl/pot.stl')   
 #print("ok!!!")

@@ -191,5 +191,5 @@ res = hight_vol()
 assembly = cq.Assembly()
 for i, shard in enumerate(res):
     assembly.add(shard, name=f"shard_{i}")
-assembly.save("./stl/voltage_support.gltf", exportType="GLTF")
+assembly.export("./stl/voltage_support.glb")
 show(assembly)

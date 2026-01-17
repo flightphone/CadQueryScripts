@@ -339,7 +339,7 @@ def create_tadj():
     res = tadj()
     assembly = cq.Assembly()
     assembly.add(res.val())
-    assembly.save("./stl/tadj.gltf", exportType="GLTF")
+    assembly.export("./stl/taj.glb")
     #cq.exporters.export(res, './stl/tadj.stl')   
     show(assembly)
     print("ok")
