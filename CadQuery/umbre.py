@@ -14,13 +14,15 @@ def um_add(plane = cq.Workplane("XY"), z = 0, r = 1, n = 4) -> cq.Workplane:
 def umbre():
     n = 8
     nn = 6
-    r = 4
+    k = 1
+
+    r = 4/k
    
     res = cq.Workplane("XY")
-    z0 = 0
-    r1 = 0.15
-    r2 = 0.2
-    r3 = 0.5
+    z0 = 0/k
+    r1 = 0.15/k
+    r2 = 0.2/k
+    r3 = 0.5/k
 
     for i in range(nn):
         a = i/(nn-1)*math.pi*0.5
@@ -31,23 +33,34 @@ def umbre():
         um_add(res, z, d, n)
     
 
-    res = res.loft(combine=True)
-    res2 = res.translate((0, 0, 0.5))
-    res = res.cut(res2)
+    tent = res.loft(combine=True)
+    res2 = tent.translate((0, 0, 0.5))
+    tent = tent.cut(res2)
     hand = cq.Workplane("XY").cylinder(2*r, r1).translate((0, 0, r))
-    res = res.union(hand)
+    #res = res.union(hand)
 
     hand2 = cq.Workplane("XY").circle(r2).revolve(180, (-r3, 1, 0), (-r3, 0, 0)).faces("<Z").workplane().sphere(r2).translate((2*r3, 0, 2*r - 0.01))
-    res = res.union(hand2)
+    #res = res.union(hand2)
     
     hand3 = cq.Workplane("XY").cylinder(2*r2, r2).translate((0, 0, 2*r - r2 ))
-    res = res.union(hand3)
-    return res
+    #res = res.union(hand3)
+    hand2 = hand2.union(hand3)
+    ass = cq.Assembly()
+
+    tent = tent.rotate((0, 0, 0), (0, 1, 0), 180)
+    hand = hand.rotate((0, 0, 0), (0, 1, 0), 180)
+    hand2 = hand2.rotate((0, 0, 0), (0, 1, 0), 180)
+    
+    ass.add(tent.val(), name="tent", color=cq.Color("blue1"))
+    ass.add(hand.val(), name="hand", color=cq.Color("gold"))
+    ass.add(hand2.val(), name="hand2", color=cq.Color("gray"))
+    return ass
     
     
 
 
 
 res = umbre()
+res.export('./stl/umbrella.glb')
 show(res)
 #cq.exporters.export(res, './stl/umbr.stl')  
