@@ -108,7 +108,7 @@ def basi():
     res = res.union(cy)
     cy2 = cq.Workplane("XY").cylinder(0.1, r0+d2).translate((0, 0, h3 + 0.5))
     cy2 = cy2.shell(0.3)
-    
+    #print(w + 2 * w2)
 
     res = res.union(cy2)
     res = res.cut(cyI)
