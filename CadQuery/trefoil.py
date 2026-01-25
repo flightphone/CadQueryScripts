@@ -28,7 +28,7 @@ def Curve3D(fn, path, r):
 
 def trefoil3D():
     path = cq.Workplane("XY").parametricCurve(trefoil, start=0.0, stop = math.tau)
-    r = 0.35
+    r = 0.4
     res = Curve3D(trefoil, path, r)
     return res
 
