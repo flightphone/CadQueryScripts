@@ -105,7 +105,6 @@ def small_dode():
     cm = cq.Compound.makeCompound(pirs)
     return cm
 
-<<<<<<< HEAD
 def big_dode():
     #vertex of icosahedron is a centre of dodecahedron face 
     r = 1
@@ -192,8 +191,6 @@ def big_dode():
     solid = cq.Solid.makeSolid(shell)
     return solid
 
-=======
->>>>>>> f3fce3cab43612e74ffccc0eccb40960431c9122
 
 #Icosahedron
 def icos():
@@ -253,7 +250,6 @@ def icos():
     return solid
         
 
-<<<<<<< HEAD
 '''
 res = dode()
 ass = cq.Assembly()
@@ -262,10 +258,6 @@ ass.save('./stl/dode.glb')
 
 
 res = small_dode()
-=======
-
-res = small_dode()#icos()#dode()#small_dode()    
->>>>>>> f3fce3cab43612e74ffccc0eccb40960431c9122
 ass = cq.Assembly()
 ass.add(res)
 ass.save('./stl/small_dode.glb')
@@ -275,7 +267,6 @@ res = icos()
 ass = cq.Assembly()
 ass.add(res)
 ass.save('./stl/icos.glb')
-<<<<<<< HEAD
 '''
 
 res = big_dode()
@@ -283,12 +274,4 @@ ass = cq.Assembly()
 ass.add(res)
 ass.save('./stl/big_dode.glb')
 show(ass)
-=======
-
-res = dode()
-ass = cq.Assembly()
-ass.add(res)
-ass.save('./stl/dode.glb')
-
->>>>>>> f3fce3cab43612e74ffccc0eccb40960431c9122
 print("ok")
