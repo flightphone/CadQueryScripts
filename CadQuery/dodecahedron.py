@@ -1,8 +1,7 @@
 import cadquery as cq
 from ocp_vscode import show
 import math
-<<<<<<< HEAD
-import numpy as np
+
 
 def cross_product(a, b):
     return (
@@ -21,11 +20,6 @@ def sub_vec (a, b):
 def normalize (a):
     ln = math.sqrt(a[0]*a[0] + a[1]*a[1] + a[2]*a[2])
     return (a[0]/ln, a[1]/ln, a[2]/ln)
-=======
-
-
-
->>>>>>> f3fce3cab43612e74ffccc0eccb40960431c9122
 
 def dode():
     #dodecahedron    
