@@ -1,25 +1,7 @@
 import cadquery as cq
 from ocp_vscode import show
 import math
-
-
-def cross_product(a, b):
-    return (
-        a[1]*b[2] - a[2]*b[1],
-        a[2]*b[0] - a[0]*b[2],
-        a[0]*b[1] - a[1]*b[0]
-    )
-
-def sub_vec (a, b):
-    return (
-        a[0] - b[0],
-        a[1] - b[1],
-        a[2] - b[2]
-    )
-
-def normalize (a):
-    ln = math.sqrt(a[0]*a[0] + a[1]*a[1] + a[2]*a[2])
-    return (a[0]/ln, a[1]/ln, a[2]/ln)
+import numpy as np
 
 def dode():
     #dodecahedron    
@@ -114,9 +96,6 @@ def big_dode():
         aa = i*math.tau/5
         topp.append((r0*math.cos(aa), r0*math.sin(aa), z))
     
-
-    
-
     botp = []
     for i in range(5):
         aa = i*math.tau/5 + math.tau/10
@@ -143,19 +122,16 @@ def big_dode():
     triangles_data2 = []
     for tri in triangles_data:
         #for each traingle create 4 new tringle
+        nptri = [np.array(e) for e in tri]
+        centre = (nptri[0] + nptri[1] + nptri[2]) / 3.0
+        v1 = nptri[1] - nptri[0]
+        v2 = nptri[2] - nptri[0]
+        norm = np.cross(v1, v2)
+        norm = norm/np.linalg.norm(norm)
+        sign = -1.0 if (np.dot(norm, centre) > 0) else 1.0
+        top = centre + sign*h*norm
+        top = (top[0], top[1], top[2])
         
-        x = (tri[0][0] + tri[1][0] + tri[2][0]) /3 
-        y = (tri[0][1] + tri[1][1] + tri[2][1]) /3 
-        z = (tri[0][2] + tri[1][2] + tri[2][2]) /3 
-        
-        v1 = sub_vec(tri[1], tri[0])    
-        v2 = sub_vec(tri[2], tri[0])    
-        norm = cross_product(v1, v2)
-        norm = normalize(norm)  
-        sign = -1
-        if (norm[0]*x + norm[1]*y + norm[2]*z) < 0:
-            sign = 1  
-        top = (x + sign * h * norm[0], y + sign * h*norm[1], z + sign * h*norm[2])
         
         triangles_data2.append((tri[0], top, tri[1]))
         triangles_data2.append((tri[1], top, tri[2]))
