@@ -30,9 +30,11 @@ def pencil():
 
     #pencil sharpenered!!!
     pencil_sharpener = pencil_sharpener.translate((0, 0, h - hc - rd))
-    skin = skin.cut(pencil_sharpener)
-    body = body.cut(pencil_sharpener)
-    coal = coal.cut(pencil_sharpener)
+    skin = skin.cut(pencil_sharpener).rotate((0, 0, 0), (0, 1, 0), 90)
+    body = body.cut(pencil_sharpener).rotate((0, 0, 0), (0, 1, 0), 90)
+    coal = coal.cut(pencil_sharpener).rotate((0, 0, 0), (0, 1, 0), 90)
+
+    
 
     
     ass = cq.Assembly()
