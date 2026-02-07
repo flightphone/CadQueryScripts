@@ -40,7 +40,7 @@ def wineglass():
     bwr22 = bwh2/bwh * (bwr2 - bwr1) + bwr1
     w1 = 0.4
     w = 0.7
-    w3 = 0.5
+    w3 = 0.6
     
 
     bwcone2 = cq.Solid.makeCone(bwr11  + w1, bwr22  + w1, bwh2 - fb) 
@@ -57,7 +57,7 @@ def wineglass():
     bw = cq.Workplane("XY").add(bwcone).edges("<Z").fillet(fb).faces(">Z").shell(-w).edges(">Z").fillet(0.2)
     bw = bw.cut(bwcut)
     
-    nn = 10
+    nn = 12
     nna = 3
 
     def helix1(t):
@@ -76,10 +76,10 @@ def wineglass():
         y = r*math.sin(-alf)
         return x, y, z
     
-    path1 = cq.Workplane("XY").parametricCurve(helix1, start=0.0, stop = bwh2 - fb)
+    path1 = cq.Workplane("XY").parametricCurve(helix1, start=0.0, stop = bwh2 - fb + 0.2)
     line1 = Curve3D(helix1, path1, w3)
 
-    path2 = cq.Workplane("XY").parametricCurve(helix2, start=0.0, stop = bwh2 - fb)
+    path2 = cq.Workplane("XY").parametricCurve(helix2, start=0.0, stop = bwh2 - fb + 0.2)
     line2 = Curve3D(helix2, path2, w3)
 
 
@@ -114,7 +114,7 @@ def wineglass():
     stem2 = stem2.add(stem3)
     stem2 = stem2.fillet(0.1)
     stem5 = cq.Solid.makeCone(0, h4, r3 + 0.01, pnt=(0, 0, 0.8*h3 + h4), dir= (1, 0, 0))
-    n = 14
+    n = 12
     for i in range(n):
         steamcut = stem5.rotate((0, 0, 0), (0, 0, 1), i/n * 360)
         stem2 = stem2.cut(steamcut)
