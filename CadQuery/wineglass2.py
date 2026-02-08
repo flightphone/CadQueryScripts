@@ -4,10 +4,10 @@ import math
 import numpy as np
 
 def fnsteam(x):
-    return 0.8*x*x
+    return 0.9*x*x
 
 def inverse_fnsteam(y):
-    return math.sqrt(y/0.8)
+    return math.sqrt(y/0.9)
 
 
 
