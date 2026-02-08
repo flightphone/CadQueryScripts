@@ -7,7 +7,7 @@ def fnsteam(x):
     return 0.8*x*x
 
 def inverse_fnsteam(y):
-    return math.sqrt(y / 0.8)
+    return math.sqrt(y/0.8)
 
 
 
@@ -21,8 +21,8 @@ def fn_r8(r):
 def wine2():
     r0 = 0.9  #diameter at the thinnest part of the leg
     h0 = 3    #height of the thinnest part of the leg  
-    r1 = r0 + fnsteam(h0) - 1.2  #We calculate the diameter of the base of the leg
-    r2 = 0.4*r1 #diameter of the ball at the middle of the leg
+    r1 = r0 + fnsteam(h0) - 1.5  #We calculate the diameter of the base of the leg
+    r2 = 0.5*r1 #diameter of the ball at the middle of the leg
     h2 = r2     #height of the prism for the ball in the middle
 
     r8 = fn_r8(r2/2)  #We calculate the smaller radius in an eight-pointed star
@@ -37,18 +37,18 @@ def wine2():
 
     rbox = 2*fnsteam(h0) + 2
 
-    h9 = 1.2 * (h0 - h8) #height of the upper section of the leg
+    h9 = 0.9 * (h0 - h8) #height of the upper section of the leg
     r9 = fnsteam(h9) + r0 #
     w9 = 0.3
 
-    bowl_h = 1.5*h0
+    bowl_h = 1.2*h0
     bowl_r1 = 1.5*r1/2
-    bowl_r2 = bowl_r1 * 0.4
+    bowl_r2 = bowl_r1 * 0.3
     
-    bowl_w = 0.1
+    bowl_w = 0.3
 
     
-    # Рисуем четверть эллипса и вращаем её
+    # ellipsoid
     bowl = cq.Workplane("XZ").ellipseArc(bowl_r1, bowl_r2, 90, 270).close().revolve()
     bowl = (cq.Workplane("XY").cylinder(bowl_h, bowl_r1, centered=(True, True, False))
             .add(bowl.translate((0, 0, bowl_r2)).val())
@@ -56,12 +56,12 @@ def wine2():
     bowl_cut = (cq.Workplane("XY").cylinder(bowl_h, bowl_r1-bowl_w, centered=(True, True, False))
     )
     bowl = bowl.cut(bowl_cut)
-    bowl_cut.fillet(bowl_w/3)
-    bowl = bowl.translate((0, 0, h0 + 2 * h3 + 2*bowl_r2 - bowl_w))
+    bowl = bowl.edges(">Z").fillet(bowl_w/3)
+    bowl = bowl.translate((0, 0, h0 + 2*h3 + h9 + bowl_r2 + w9))
 
     
 
-    n = 10  
+    n = 20  
 
 
 
@@ -94,7 +94,7 @@ def wine2():
     
     sharpener2 = cq.Workplane("XY").box(rbox/2, rbox/2, 3*h0, centered=(True, True, False)).cut(stem)
     sharpener2 = sharpener2.translate((0, 0, h28 - h8))
-    sp = sp.union(sp.rotate((0, 0, 0), (0, 1, 0), 180)).edges("|Z").fillet(0.03*r2)
+    sp = sp.union(sp.rotate((0, 0, 0), (0, 1, 0), 180)).edges("|Z").fillet(0.01*r2)
 
     sp = sp.cut(sharpener2)
     sharpener2 = sharpener2.rotate((0, 0, 0), (0, 1, 0), 180)
@@ -112,5 +112,5 @@ def wine2():
 
 
 ass = wine2()
-ass.save("./stl/wine2.glb")
+#ass.save("./stl/wine2.glb")
 show(ass)
