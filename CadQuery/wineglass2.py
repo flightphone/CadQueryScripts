@@ -130,5 +130,5 @@ def wine2():
 
 
 ass = wine2()
-#ass.save("./stl/wine2.glb")
+ass.save("./stl/wine2.glb")
 show(ass)
