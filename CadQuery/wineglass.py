@@ -3,8 +3,8 @@ from ocp_vscode import show
 import math
 import numpy as np
 
-def um_add(plane = cq.Workplane("XY"), z = 0, r = 1, n = 4) -> cq.Workplane:
-    plane.workplane(offset=z).polygon(n, r)
+#def um_add(plane = cq.Workplane("XY"), z = 0, r = 1, n = 4) -> cq.Workplane:
+#    plane.workplane(offset=z).polygon(n, r)
 
 def Curve3D(fn, path, r):
     h = 0.005
@@ -16,7 +16,7 @@ def Curve3D(fn, path, r):
 
     result = (
         cq.Workplane(pl) 
-        .polygon(6, r)     
+        .polygon(4, r)     
         .sweep(path, isFrenet=True) 
     )
     return result    
@@ -89,8 +89,12 @@ def wineglass():
         bwres.append(li1.val())
         li2 = line2.rotate((0, 0, 0), (0, 0, 1), i / nn * 360)
         bwres.append(li2.val())
+        #bw = bw.cut(li1)
+        #bw = bw.cut(li2)
     
     bwcomp = cq.Compound.makeCompound(bwres)
+    #bwcomp = bw.val()
+    
     
     
     
@@ -131,5 +135,5 @@ def wineglass():
     
 
 res = wineglass()    
-res.save("./stl/wineglass.glb")
+#res.save("./stl/wineglass.glb")
 show(res)
