@@ -17,13 +17,35 @@ def fn_r8(r):
     r8 = math.sqrt(x*x + (r-x)*(r-x))
     return r8
     
+def fn_bowl(bowl_r1, bowl_r2, bowl_h, bowl_w, alf = 0.001):
+    # ellipsoid
+    def bowl_solid(r1, r2, h, a):
+        bs = cq.Workplane("XZ").ellipseArc(r1, r2, 90, 270).close().revolve()
+        x = r1*math.cos(a)
+        y = r2*math.sin(a)
+        z = r2*math.cos(a)*math.cos(a)/math.sin(a)
+        r3 = (z-h) / z * x
+        con = cq.Solid.makeCone(x, r3, h)
+        con = con.translate((0, 0, y))
+        bs = bs.translate((0, 0, r2))
+        bs = bs.add(con)
+        return bs
+
+    
+    bowl = bowl_solid(bowl_r1, bowl_r2, bowl_h, alf)
+    bowl_cut = bowl_solid(bowl_r1 - bowl_w, bowl_r2 - bowl_w, bowl_h + bowl_w, alf)
+    bowl_cut = bowl_cut.translate((0, 0, bowl_w))
+    bowl = bowl.cut(bowl_cut)
+    bowl = bowl.edges(">Z").fillet(bowl_w/3)
+    return bowl
+
 
 def wine2():
     r0 = 0.9  #diameter at the thinnest part of the leg
     h0 = 3.5    #height of the thinnest part of the leg  
-    r1 = r0 + fnsteam(h0) - 1.5  #We calculate the diameter of the base of the leg
+    r1 = r0 + fnsteam(h0) - 2.  #We calculate the diameter of the base of the leg
     r2 = 0.45*r1 #diameter of the ball at the middle of the leg
-    h2 = 1.6*r2     #height of the prism for the ball in the middle
+    h2 = 1.4*r2     #height of the prism for the ball in the middle
 
     r8 = fn_r8(r2/2)  #We calculate the smaller radius in an eight-pointed star
     r8a = r8/math.cos(math.pi/8) 
@@ -41,26 +63,17 @@ def wine2():
     r9 = fnsteam(h9) + r0 #
     w9 = 0.3
 
-    bowl_h = 1.2*h0
+    bowl_h = 1.4*h0
     bowl_r1 = 1.7*r1/2
     bowl_r2 = bowl_r1 * 0.3
     
     bowl_w = 0.2
+    bowl_alf = math.pi* 4 /180
 
     
-    # ellipsoid
-    bowl = cq.Workplane("XZ").ellipseArc(bowl_r1, bowl_r2, 90, 270).close().revolve()
-    bowl = (cq.Workplane("XY").cylinder(bowl_h, bowl_r1, centered=(True, True, False))
-            .add(bowl.translate((0, 0, bowl_r2)).val())
-    )
-    bowl_cut = (cq.Workplane("XY").cylinder(bowl_h, bowl_r1-bowl_w, centered=(True, True, False))
-    )
-    bowl = bowl.cut(bowl_cut)
-    bowl = bowl.edges(">Z").fillet(bowl_w/3)
-    bowl = bowl.translate((0, 0, h0 + 2*h3 + h9 + bowl_r2 + w9))
-
+    bowl = fn_bowl(bowl_r1, bowl_r2, bowl_h, bowl_w, bowl_alf)
+    bowl = bowl.translate((0, 0, h0 + 2*h3 + h9 + bowl_r2 + 2*w9))
     
-
     n = 20  
 
 
@@ -117,10 +130,10 @@ def wine2():
 
 
     sp = sp.translate((0, 0, h0 + h3))
-    comp = cq.Compound.makeCompound([sp.val(), stem_bot.val(), stem_top.val(), bowl.val()])
-    #comp = cq.Compound.makeCompound([sp.val()])
+    comp = cq.Compound.makeCompound([sp.val(), stem_bot.val(), stem_top.val()])
     ass = cq.Assembly()
-    ass.add(comp)
+    ass.add(comp, name="stem")
+    ass.add(bowl.val(), name="bowl")
     return ass
     
 
