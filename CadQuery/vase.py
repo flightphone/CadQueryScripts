@@ -25,19 +25,19 @@ def vase():
     r2 = 9.6
     h = 6.8
     w = 0.75
-    w3 = 0.7*w
+    w3 = w*0.9
     bs = cq.Workplane("XZ").ellipseArc(r1, r2, 90, 270).close().revolve().translate((0, 0, r2))
     box = cq.Workplane("XY").box(10, 10, 10, centered=(True, True, False))
     bs = bs.cut(box.translate((0, 0, h)))
     bs = bs.cut(box.translate((0, 0, -h - 10)))
     bs = bs.faces(">Z").shell(-w)
 
-    nn = 20
+    nn = 22
     nna = 5
 
     def helix1(t):
         z = t
-        r = r1*math.sqrt(1 - z*z/r2/r2) - z*z/h/h * w3/2
+        r = r1*math.sqrt(1 - z*z/r2/r2) - z*z*z*z/h/h/h/h * w3/2
         #r = r1*math.sqrt(1 - z*z/r2/r2) 
         alf = (t + h) / 2 / h * nna / nn * math.tau
         x = r*math.cos(alf)
@@ -46,7 +46,7 @@ def vase():
     
     def helix2(t):
         z = t
-        r = r1*math.sqrt(1 - z*z/r2/r2) - z*z/h/h * w3/2
+        r = r1*math.sqrt(1 - z*z/r2/r2) - z*z*z*z/h/h/h/h * w3/2
         #r = r1*math.sqrt(1 - z*z/r2/r2) 
         alf = (t + h) / 2 / h * nna / nn * math.tau
         x = r*math.cos(-alf)
@@ -56,13 +56,13 @@ def vase():
     path1 = cq.Workplane("XY").parametricCurve(helix1, start=-h, stop = h)
     line1 = Curve3D(helix1, path1, w3)
     line1 = line1.cut(box.translate((0, 0, h)))
-    line1 = line1.cut(box.translate((0, 0, -h - 10)))
+    line1 = line1.cut(box.translate((0, 0, -h - 10.001)))
 
 
     path2 = cq.Workplane("XY").parametricCurve(helix2, start=-h, stop = h)
     line2 = Curve3D(helix2, path2, w3)
     line2 = line2.cut(box.translate((0, 0, h)))
-    line2 = line2.cut(box.translate((0, 0, -h - 10)))
+    line2 = line2.cut(box.translate((0, 0, -h - 10.001)))
 
 
     bwres = [bs.val()]
@@ -78,5 +78,5 @@ def vase():
     return ass
 
 res = vase()    
-#res.save("./stl/vase.glb")
+res.save("./stl/vase.glb")
 show(res)
