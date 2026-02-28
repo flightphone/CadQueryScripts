@@ -3,10 +3,10 @@ from ocp_vscode import show
 import math
 import numpy as np
 
-def Curve3D(fn, path, r):
-    h = 0.005
-    a = fn(0)
-    b = fn(h)
+def Curve3D(fn, path, r, start):
+    h = 0.0001
+    a = fn(start)
+    b = fn(start+ h)
     norm = (b[0]-a[0], b[1]- a[1], b[2]-a[2])
     pl = cq.Plane(origin=a, normal= norm)
 
@@ -26,10 +26,11 @@ def vase():
     h = 6.8
     w = 0.75
     w3 = w*0.9
+    k = 1.027
     bs = cq.Workplane("XZ").ellipseArc(r1, r2, 90, 270).close().revolve().translate((0, 0, r2))
     box = cq.Workplane("XY").box(10, 10, 10, centered=(True, True, False))
-    bs = bs.cut(box.translate((0, 0, h)))
-    bs = bs.cut(box.translate((0, 0, -h - 10)))
+    bs = bs.cut(box.translate((0, 0, h*k)))
+    bs = bs.cut(box.translate((0, 0, -h*k - 10)))
     bs = bs.faces(">Z").shell(-w)
 
     nn = 22
@@ -53,16 +54,16 @@ def vase():
         y = r*math.sin(-alf)
         return x, y, z
     
-    path1 = cq.Workplane("XY").parametricCurve(helix1, start=-h, stop = h)
-    line1 = Curve3D(helix1, path1, w3)
-    line1 = line1.cut(box.translate((0, 0, h)))
-    line1 = line1.cut(box.translate((0, 0, -h - 10.001)))
+    path1 = cq.Workplane("XY").parametricCurve(helix1,  start=-h, stop = h)
+    line1 = Curve3D(helix1, path1, w3, -h)
+    #line1 = line1.cut(box.translate((0, 0, h)))
+    #line1 = line1.cut(box.translate((0, 0, -h - 10.00)))
 
 
-    path2 = cq.Workplane("XY").parametricCurve(helix2, start=-h, stop = h)
-    line2 = Curve3D(helix2, path2, w3)
-    line2 = line2.cut(box.translate((0, 0, h)))
-    line2 = line2.cut(box.translate((0, 0, -h - 10.001)))
+    path2 = cq.Workplane("XY").parametricCurve(helix2,  start=-h, stop = h)
+    line2 = Curve3D(helix2, path2, w3, -h)
+    #line2 = line2.cut(box.translate((0, 0, h)))
+    #line2 = line2.cut(box.translate((0, 0, -h - 10.00)))
 
 
     bwres = [bs.val()]
@@ -78,5 +79,5 @@ def vase():
     return ass
 
 res = vase()    
-res.save("./stl/vase.glb")
+#res.save("./stl/vase.glb")
 show(res)
