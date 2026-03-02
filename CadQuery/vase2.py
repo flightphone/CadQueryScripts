@@ -22,8 +22,8 @@ def vase2():
 
     
 
-    x_krita = [ 550, 537.5, 400, 300, 225, 150, 75]
-    y_krita = [ 375, 387.5, 462.5, 462.5, 400, 387.5, 425]
+    x_krita = [625, 575, 550, 537.5, 400, 300, 225, 150, 75]
+    y_krita = [400, 400,  375, 387.5, 462.5, 462.5, 400, 387.5, 425]
     y0 = 312.5
 
     x_coords = [(x_krita[0] - x)/10 for x in x_krita]
@@ -32,44 +32,54 @@ def vase2():
     res = (cq.Workplane("ZX").moveTo(0, 0).lineTo(x_coords[0], y_coords[0]).spline(p).lineTo(x_coords[-1], 0).close()
         .revolve(360, (0, 0, 0), (1, 0, 0))
     )
-    h = x_coords[-1]
+    h = x_coords[-1]*0.98
+    sh = x_coords[2]
     nn = 13
     nna = 5
     r = 100
-    w = 1
-    r1 = w*0.7
+    w = 1.2
+    r1 = w*0.5
+    sm = 1.15
     
 
     
     def helix1(t):
         z = t
-        alf = t / h * nna / nn * math.tau
+        alf = (t - sh) / (h - sh) * nna / nn * math.tau
         x = r*math.cos(alf)
         y = r*math.sin(alf)
+
+        d = (z-(sh + h)/2.)/(h-sh)*2.
+        d = d*d*d*d*r1*sm
+
         line = cq.Edge.makeLine(cq.Vector(x, y, z), cq.Vector(0, 0, z))
         intersections = res.val().intersect(line)
         if intersections:
-            return intersections.Vertices()[0].X, intersections.Vertices()[0].Y, intersections.Vertices()[0].Z
+            return intersections.Vertices()[0].X - math.cos(alf)*d, intersections.Vertices()[0].Y - math.sin(alf)*d, intersections.Vertices()[0].Z
         
     def helix2(t):
         z = t
-        alf = t / h * nna / nn * math.tau
+        alf = (t - sh) / (h - sh) * nna / nn * math.tau
         x = r*math.cos(-alf)
         y = r*math.sin(-alf)
+
+        d = (z-(sh + h)/2.)/(h-sh)*2.
+        d = d*d*d*d*r1*sm
+
         line = cq.Edge.makeLine(cq.Vector(x, y, z), cq.Vector(0, 0, z))
         intersections = res.val().intersect(line)
         if intersections:
-            return intersections.Vertices()[0].X, intersections.Vertices()[0].Y, intersections.Vertices()[0].Z    
+            return intersections.Vertices()[0].X- math.cos(-alf)*d, intersections.Vertices()[0].Y- math.sin(-alf)*d, intersections.Vertices()[0].Z    
     
     box = cq.Workplane("XY").box(100, 100, 10, centered=(True, True, False))    
-    path1 = cq.Workplane("XY").parametricCurve(helix1,  start=0.01, stop = 0.99*h)
-    line1 = Curve3D(helix1, path1, r1, 0)
-    line1 = line1.cut(box.translate((0, 0, x_coords[-1])))
+    path1 = cq.Workplane("XY").parametricCurve(helix1, N=25, start=sh, stop = h)
+    line1 = Curve3D(helix1, path1, r1, sh)
+    line1 = line1.cut(box.translate((0, 0, h)))
     line1 = line1.cut(box.translate((0, 0, -10)))
 
-    path2 = cq.Workplane("XY").parametricCurve(helix2,  start=0.01, stop = 0.99* h)
-    line2 = Curve3D(helix2, path2, r1, 0)
-    line2 = line2.cut(box.translate((0, 0, x_coords[-1])))
+    path2 = cq.Workplane("XY").parametricCurve(helix2, N=25, start=sh, stop = h)
+    line2 = Curve3D(helix2, path2, r1, sh)
+    line2 = line2.cut(box.translate((0, 0, h)))
     line2 = line2.cut(box.translate((0, 0, -10)))
 
     res = res.faces(">Z").shell(-w)
