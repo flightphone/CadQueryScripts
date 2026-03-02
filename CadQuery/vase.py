@@ -26,7 +26,7 @@ def vase():
     h = 6.8
     w = 0.75
     w3 = w*0.9
-    k = 1.027
+    k = 1.028
     bs = cq.Workplane("XZ").ellipseArc(r1, r2, 90, 270).close().revolve().translate((0, 0, r2))
     box = cq.Workplane("XY").box(10, 10, 10, centered=(True, True, False))
     bs = bs.cut(box.translate((0, 0, h*k)))
