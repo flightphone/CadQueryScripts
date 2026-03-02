@@ -22,9 +22,9 @@ def vase2():
 
     
 
-    x_krita = [625, 575, 550, 537.5, 400, 300, 225, 150, 75]
-    y_krita = [400, 400,  375, 387.5, 462.5, 462.5, 400, 387.5, 425]
-    y0 = 312.5
+    x_krita = [625, 575, 550, 537.5, 400, 300, 225, 150, 75]  # coords from krita project
+    y_krita = [400, 400,  375, 387.5, 462.5, 462.5, 400, 387.5, 425] # coords from krita project
+    y0 = 312.5  #coords from krita project
 
     x_coords = [(x_krita[0] - x)/10 for x in x_krita]
     y_coords = [(y - y0)/10 for y in y_krita]
@@ -32,20 +32,23 @@ def vase2():
     res = (cq.Workplane("ZX").moveTo(0, 0).lineTo(x_coords[0], y_coords[0]).spline(p).lineTo(x_coords[-1], 0).close()
         .revolve(360, (0, 0, 0), (1, 0, 0))
     )
-    h = x_coords[-1]*0.98
-    sh = x_coords[2]
-    nn = 13
-    nna = 5
-    r = 100
-    w = 1.2
-    r1 = w*0.5
-    sm = 1.15
+    
+    sh = x_coords[2]  # start diamond
+    h = x_coords[-1]*0.98 # stop diamond
+    
+    
+    
+    nn = 13  # count segments
+    nna = 5  # count twist segments
+    r = 100  # bounded radius 
+    w = 1.2  # width
+    r1 = w*0.5  # radius diamond
+    sm = 1.15   #
     
 
-    
-    def helix1(t):
+    def helix0(t, sign):
         z = t
-        alf = (t - sh) / (h - sh) * nna / nn * math.tau
+        alf = sign * (t - sh) / (h - sh) * nna / nn * math.tau
         x = r*math.cos(alf)
         y = r*math.sin(alf)
 
@@ -56,20 +59,12 @@ def vase2():
         intersections = res.val().intersect(line)
         if intersections:
             return intersections.Vertices()[0].X - math.cos(alf)*d, intersections.Vertices()[0].Y - math.sin(alf)*d, intersections.Vertices()[0].Z
+    
+    def helix1(t):
+        return helix0(t, 1)
         
     def helix2(t):
-        z = t
-        alf = (t - sh) / (h - sh) * nna / nn * math.tau
-        x = r*math.cos(-alf)
-        y = r*math.sin(-alf)
-
-        d = (z-(sh + h)/2.)/(h-sh)*2.
-        d = d*d*d*d*r1*sm
-
-        line = cq.Edge.makeLine(cq.Vector(x, y, z), cq.Vector(0, 0, z))
-        intersections = res.val().intersect(line)
-        if intersections:
-            return intersections.Vertices()[0].X- math.cos(-alf)*d, intersections.Vertices()[0].Y- math.sin(-alf)*d, intersections.Vertices()[0].Z    
+        return helix0(t, -1)
     
     box = cq.Workplane("XY").box(100, 100, 10, centered=(True, True, False))    
     path1 = cq.Workplane("XY").parametricCurve(helix1, N=25, start=sh, stop = h)
@@ -84,6 +79,7 @@ def vase2():
 
     res = res.faces(">Z").shell(-w)
     res = res.edges(">Z").fillet(0.4*w)
+    res = res.edges("<Z").fillet(w)
     
     lines = [res.val()]
     
