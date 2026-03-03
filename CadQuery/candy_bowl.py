@@ -5,7 +5,7 @@ import math
 
 def candy_bowl():
     r = 1
-    h = 0.85
+    h = 0.9
     w = 0.08
     box = cq.Workplane("XY").box(10, 10, 10, centered=(True, True, False))
     res = (cq.Workplane("XY").sphere(r)
@@ -13,14 +13,14 @@ def candy_bowl():
            .cut(box.translate((0, 0, -h-10))) 
            .faces(">Z").shell(-w)
            )
-    n = 5
-    d = 0.2
+    n = 6
+    d = 0.15
     nn = 100
 
     def fn_wave(alf, r, n, d):
         x = r*math.cos(alf)
         y = r*math.sin(alf)
-        z = d*(math.sin(alf*n)) #+ d/5*math.sin(alf*n*2.*math.tau)
+        z = d*(math.sin(alf*n))# + d/5*math.sin(alf*n*2.*math.tau)
         return x, y, z
 
     
@@ -56,7 +56,7 @@ def wave2 (n, r = 1, a = math.pi/4):
 
 def candy_bowl2():
     r = 1
-    h = 0.85
+    h = 0.9
     w = 0.05
     box = cq.Workplane("XY").box(10, 10, 10, centered=(True, True, False))
     res = (cq.Workplane("XY").sphere(r)
@@ -64,8 +64,8 @@ def candy_bowl2():
            .cut(box.translate((0, 0, -h-10))) 
            .faces(">Z").shell(-w)
            )
-    n = 4
-    d = 0.2
+    n = 6
+    d = 0.15
     nn = 100
 
     def fn_wave(alf, r, n, d):
@@ -88,7 +88,7 @@ def candy_bowl2():
     return ass
 
 
-res = candy_bowl()
+res = candy_bowl2()
 #res = wave2(6)
 #res.save("./stl/candy_bowl.glb")
 show(res)
