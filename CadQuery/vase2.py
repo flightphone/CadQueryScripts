@@ -1,7 +1,7 @@
 import cadquery as cq
 from ocp_vscode import show
 import math
-import numpy as np
+
 
 def Curve3D(fn, path, r, start):
     h = 0.01
@@ -74,7 +74,7 @@ def vase2():
     r = 100  # bounded radius 
     w = 1.  # width
     r1 = w*0.5  # radius diamond line
-    sm = 1.15   #
+    sm = 1.15   # line shift coefficient
     
 
     def helix0(t, sign):
@@ -111,6 +111,7 @@ def vase2():
 
     wv = wave2(nn, y_coords[-1], a=math.pi/3)
     wv = wv.translate((0, 0, x_coords[-1]- 1.35)).rotate((0, 0, 0), (0, 0, 1), -90/nn)
+    # - 1.35  - empirical bias
     
     res = res.faces(">Z").shell(-w)
     res = res.cut(wv)
@@ -132,5 +133,5 @@ def vase2():
 
 
 res = vase2()    
-res.save("./stl/vase2.glb")
+#res.save("./stl/vase2.glb")
 show(res)
