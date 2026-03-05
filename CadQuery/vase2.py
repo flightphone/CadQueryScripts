@@ -1,7 +1,53 @@
 import cadquery as cq
 from ocp_vscode import show
 import math
+import numpy as np
 
+
+def diamond_disc(a, b, norm, d = 0.1, alf = math.pi/3):
+    # a, b - ends of a segment
+    # norm - normal to the surface of the solid
+    # d - groove depth
+    # alf - groove cutting angle
+    ab = (b - a)
+    len_ab = np.linalg.norm(ab)
+    ab = ab/len_ab
+    cos = np.dot(norm, ab)
+    hv = norm - ab*cos
+    hv = hv/np.linalg.norm(hv)  #
+    # deep = len_ab*d, deep/(len_ab/2) = (len_ab/2)/h
+    deep = len_ab*d
+    h = len_ab / d / 4
+    r = (h + deep)/2
+    centre = (a + b)/2 + hv*(r-deep) 
+    
+    offs = r / math.tan(alf/2)
+    r2 = r / math.sin(alf/2)
+
+    norm2 = np.cross(ab, hv)
+    norm2 = norm2 / np.linalg.norm (norm2)
+    
+    
+    
+    pl = cq.Plane(origin=(centre[0], centre[1], centre[2]), normal= (norm2[0], norm2[1], norm2[2]))
+    sp1 = cq.Workplane(pl).workplane(offset=offs).sphere(r2)
+    sp2 = cq.Workplane(pl).workplane(offset=-offs).sphere(r2)
+    res = sp1.intersect(sp2)
+    return res
+
+def pattern0(r2, h):
+    nn = 13
+    nns = 5
+    alf = math.tau/nn
+    norm2 = np.array([0, 0, -1])
+    pa = np.array([r2, 0, -h])
+    pb = np.array([r2*math.cos(nns*alf), r2*math.sin(nns*alf), -h])
+    disc = diamond_disc(pa, pb, norm2, 0.07, math.pi/3).val()
+    discs = [disc.rotate((0, 0, 0), (0, 0, 1), 360 / nn * i) for i in range(nn)]
+    combined_discs = discs[0]
+    for d in discs[1:]:
+        combined_discs = combined_discs.fuse(d)
+    return combined_discs
 
 def Curve3D(fn, path, r, start):
     h = 0.01
@@ -116,6 +162,10 @@ def vase2():
     res = res.faces(">Z").shell(-w)
     res = res.cut(wv)
     res = res.edges().fillet(0.4*w)
+
+    r2 = y_coords[0]* 0.9
+    disc0 = pattern0(r2, 0) 
+    res = res.cut(disc0)   
     
     lines = [res.val()]
     

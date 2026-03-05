@@ -41,7 +41,7 @@ def pattern0(r2, h):
     norm2 = np.array([0, 0, -1])
     pa = np.array([r2, 0, -h])
     pb = np.array([r2*math.cos(nns*alf), r2*math.sin(nns*alf), -h])
-    disc = diamond_disc(pa, pb, norm2, 0.05, math.pi/3).val()
+    disc = diamond_disc(pa, pb, norm2, 0.07, math.pi/3).val()
     discs = [disc.rotate((0, 0, 0), (0, 0, 1), 360 / nn * i) for i in range(nn)]
     combined_discs = discs[0]
     for d in discs[1:]:
@@ -59,7 +59,7 @@ def pattern1(r, n2 = 6):
     a = np.array(points[0])
     for p in points[1:]:
         b = np.array(p)
-        disc = diamond_disc(a, b, (a+b)/2, 0.04)
+        disc = diamond_disc(a, b, (a+b)/2, 0.05, math.pi/3)
         discs.append(disc.val())
 
     combined_discs = discs[0]
@@ -76,16 +76,17 @@ def pattern1(r, n2 = 6):
 def candy_bowl():
     r = 1
     h = 0.9
-    w = 0.075
+    h0 = 0.3
+    w = 0.08
     
     box = cq.Workplane("XY").box(10, 10, 10, centered=(True, True, False))
     res = (cq.Workplane("XY").sphere(r)
-           .cut(box)
+           .cut(box.translate((0, 0, h0)))
            .cut(box.translate((0, 0, -h-10))) 
            .faces(">Z").shell(-w)
            )
     n = 6
-    d = 0.1
+    d = 0.15
     nn = 100
 
     def fn_wave(alf, r, n, d):
@@ -96,8 +97,8 @@ def candy_bowl():
 
     
     p = [fn_wave (-math.tau*i/nn, r*1.1, n, d)  for i in range(nn)]
-    path = (cq.Workplane("XY").spline(p, periodic=True).close().workplane(offset=0.15).circle(0.5)
-            .loft().translate((0, 0, -d-0.05)).val()
+    path = (cq.Workplane("XY").spline(p, periodic=True).close().workplane(offset=0.).circle(0.5)
+            .loft().translate((0, 0, h0-d)).val()
         )
     res = res.cut(path)
     res = res.fillet(0.4*w)
@@ -120,5 +121,5 @@ def candy_bowl():
 
 
 res = candy_bowl()
-res.save("./stl/candy_bowl.glb")
+#res.save("./stl/candy_bowl.glb")
 show(res)
