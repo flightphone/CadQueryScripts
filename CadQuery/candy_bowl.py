@@ -65,7 +65,7 @@ def pattern1(r, n2 = 6):
     combined_discs = discs[0]
     for d in discs[1:]:
         combined_discs = combined_discs.fuse(d)
-    combined_discs = combined_discs.rotate((0, 0, 0), (0, 1, 0), 120).rotate((0, 0, 0), (0, 0, 1), 90/n2)    
+    combined_discs = combined_discs.rotate((0, 0, 0), (0, 1, 0), 110).rotate((0, 0, 0), (0, 0, 1), 90/n2)    
     discs2 = [combined_discs.rotate((0, 0, 0), (0, 0, 1), i*360/n2)  for i in range(n2)]
     combined_discs2 = discs2[0]
     for d in discs2[1:]:
@@ -73,11 +73,28 @@ def pattern1(r, n2 = 6):
     return combined_discs2    
 
 
+def pattern2(r, n2 = 6):
+    alf0 = 0
+    alf = 0.25*math.pi
+    a = np.array([r*math.cos(alf0), 0, -r*math.sin(alf0)])
+    b = np.array([r*math.cos(alf0+alf), 0, -r*math.sin(alf0+alf)])
+    disc = diamond_disc(a, b, (a+b)/2, 0.01, math.pi/2)
+    disc = disc.rotate((0, 0, 0), (0, 0, 1),  -90/n2).val()
+
+    discs = [disc.rotate((0, 0, 0), (0, 0, 1), i*360/n2)  for i in range(n2)]
+    combined_discs = discs[0]
+    for d in discs[1:]:
+        combined_discs = combined_discs.fuse(d)
+    return combined_discs    
+    
+
+    
+
 def candy_bowl():
     r = 1
     h = 0.9
-    h0 = 0.3
-    w = 0.08
+    h0 = 0.4
+    w = 0.09
     
     box = cq.Workplane("XY").box(10, 10, 10, centered=(True, True, False))
     res = (cq.Workplane("XY").sphere(r)
@@ -112,6 +129,9 @@ def candy_bowl():
     disc1 = pattern1(r, n) 
     res = res.cut(disc1)   
 
+    disc2 = pattern2(r, n)
+    res = res.cut(disc2)
+
     ass = cq.Assembly()
     ass.add(res)
     return ass
@@ -121,5 +141,5 @@ def candy_bowl():
 
 
 res = candy_bowl()
-#res.save("./stl/candy_bowl.glb")
+res.save("./stl/candy_bowl.glb")
 show(res)
