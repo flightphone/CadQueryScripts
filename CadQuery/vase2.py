@@ -42,7 +42,7 @@ def pattern0(r2, h):
     norm2 = np.array([0, 0, -1])
     pa = np.array([r2, 0, -h])
     pb = np.array([r2*math.cos(nns*alf), r2*math.sin(nns*alf), -h])
-    disc = diamond_disc(pa, pb, norm2, 0.07, math.pi/3).val()
+    disc = diamond_disc(pa, pb, norm2, 0.05, math.pi/3).val()
     discs = [disc.rotate((0, 0, 0), (0, 0, 1), 360 / nn * i) for i in range(nn)]
     combined_discs = discs[0]
     for d in discs[1:]:
@@ -183,5 +183,5 @@ def vase2():
 
 
 res = vase2()    
-#res.save("./stl/vase2.glb")
+res.save("./stl/vase2.glb")
 show(res)
