@@ -72,10 +72,6 @@ def intersect(sol, x, y, z):
     if intersections:
         return (intersections.Vertices()[0].X, intersections.Vertices()[0].Y, intersections.Vertices()[0].Z)
 
-def inter(sol, z, alf, bound_radius = 100):
-    x = bound_radius*math.cos(alf)
-    y = bound_radius*math.sin(alf)
-    return intersect(sol, x, y, z)
 
 
 def surf_normal(sol, z, alf, bound_radius = 100):
@@ -96,7 +92,8 @@ def surf_normal(sol, z, alf, bound_radius = 100):
 
     du = np.array(intersect(sol, x1, y1, z)) - np.array(intersect(sol, x0, y0, z))
     dv = np.array(intersect(sol, x, y, z1)) - np.array(intersect(sol, x, y, z0))
-    res = np.cross(du, dv)
+    point = np.array(intersect(sol, x, y, z))
+    res = np.cross(du, dv), point
     return res
 
 
@@ -141,13 +138,12 @@ def vase4():
     
     #normal
     
-    z = (x_coords[-1])*0.4
+    z = (x_coords[-1])*0.3
     alf = 0
-    normz = surf_normal(res.val(), z, alf)
+    normz, apoint = surf_normal(res.val(), z, alf)
+    
     normy = np.cross(normz, np.array([0, 0, -1]))
     normx = np.cross(normy, normz)
-
-    apoint = np.array(inter(res.val(), z, alf))
 
     normz = normz/np.linalg.norm(normz)
     normx = normx/np.linalg.norm(normx)
@@ -155,8 +151,8 @@ def vase4():
 
 
     
-    cpoint = np.array(apoint) - 15*normz
-    rr = 7
+    cpoint = np.array(apoint) - 25*normz
+    rr = 5
     points = [apoint + rr*normx*math.cos(i*delta) + rr*normy*math.sin(i*delta)  for i in range(nn)]
     
     pnts = []
@@ -169,8 +165,9 @@ def vase4():
         pnts.append(np.array(p))
         z = p[2] 
         alf = math.atan2(p[1], p[0])
-        norm  = surf_normal(res.val(), z, alf)
+        norm, _  = surf_normal(res.val(), z, alf)
         norms.append(norm)
+
 
     discs = []        
     '''
@@ -182,6 +179,7 @@ def vase4():
         disc = diamond_disc(a, b, norm, 0.04).val()
         discs.append(disc)
     '''
+    
     a = pnts[0]
     for i in range(1, nn):
         b = pnts[i]
@@ -223,5 +221,5 @@ def vase4():
 
 
 res = vase4()    
-#res.save("./stl/vase2.glb")
+res.save("./stl/vase2.glb")
 show(res)
