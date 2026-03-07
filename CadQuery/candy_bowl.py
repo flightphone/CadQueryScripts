@@ -188,9 +188,8 @@ def candy_bowl():
     hp0 = -0.89
     hp1 = 0.3
     dline0 = pattern3(res.val(), hp0, hp1, n, 1)
-    dline2 = pattern4(res.val(), n)
-    #dline1 = pattern5(res.val(), hp0, 0.2, 17, 7, 0.01)
-    dline1 = pattern5(res.val(), hp0, 0.09, 80, 0.01)
+    dline1 = pattern4(res.val(), n)
+    #dline2 = pattern5(res.val(), hp0, 0.09, 80, 0.01)
     
     res = res.faces(">Z").shell(-w)
 
@@ -216,7 +215,7 @@ def candy_bowl():
     
     res = res.cut(dline0)
     res = res.cut(dline1)
-    res = res.cut(dline2)
+    
     
     disc0 = pattern0(r2, h) 
     res = res.cut(disc0)   
