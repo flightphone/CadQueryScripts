@@ -32,7 +32,7 @@ def diamond_line(sol, h0, h1, alf_shift, deep, N = 100, bound_radius = 100, k = 
     )
     return result.val()    
 
-def diamond_disc(a, b, norm, d = 0.1, alf = math.pi/3):
+def diamond_disc(a, b, norm, d = 0.1, alf = math.pi/3, ext = False):
     # a, b - ends of a segment
     # norm - normal to the surface of the solid
     # d - groove depth
@@ -61,7 +61,10 @@ def diamond_disc(a, b, norm, d = 0.1, alf = math.pi/3):
     sp1 = cq.Workplane(pl).workplane(offset=offs).sphere(r2)
     sp2 = cq.Workplane(pl).workplane(offset=-offs).sphere(r2)
     res = sp1.intersect(sp2)
-    return res
+    if ext:
+        return res, norm2, centre
+    else: 
+        return res
 
 def multi_disc(combined_discs, n2):
     discs2 = [combined_discs.rotate((0, 0, 0), (0, 0, 1), i*360/n2)  for i in range(n2)]
@@ -126,8 +129,6 @@ def pattern2(r, n2 = 6):
     combined_discs2 = multi_disc_comp(combined_discs, n2)
     return combined_discs2 
     
-    
-
 
 def pattern3(sol, hp0, hp1, nn, n):
     alf = math.tau/nn * n
@@ -138,37 +139,21 @@ def pattern3(sol, hp0, hp1, nn, n):
     lines0 = multi_disc_comp(line0, nn)
     lines1 = multi_disc_comp(line1, nn)
     combined = lines0.fuse(lines1)
-    #line = line0.fuse(line1)
-    #line = line.rotate((0, 0, 0), (0, 0, 1),  90/nn)
-    #combined = multi_disc(line, nn)
+    line = line0.fuse(line1)
+    combined = multi_disc(line, nn)
     return combined    
 
 def pattern4(sol, nn):
-    
-    #lines = [(0.09, 0.15*math.pi), (0.07, 0.13*math.pi), (0.05, 0.11*math.pi), (0.03, 0.09*math.pi), (0.01, 0.07*math.pi), (-0.01, 0.05*math.pi)]
     lines = [(0.07 - 0.03*i, (0.15 - 0.02*i)*math.pi) for i in range(7)]
     dlines = [diamond_line(sol, p[0], p[0], p[1], 0.01, 50, 10, 0.).rotate((0, 0, 0), (0, 0, 1),  -90/nn - p[1]/2*360/math.tau) for p in lines]
     combined = dlines[0]
     for d in dlines[1:]:
         combined = combined.fuse(d)
-
-    
     combined2 = multi_disc_comp(combined, nn)
     return combined2
 
 
-def pattern5(sol, hp0, hp1, nn,  deep):
-    #alf = math.tau/nn * n
-    alf = 0
-    line0 = diamond_line(sol, hp0, hp1, alf, deep, N=25, bound_radius=3, k = 0)
-    line0 = line0.rotate((0, 0, 0), (0, 0, 1),  90/nn)
-    #line1 = diamond_line(sol, hp0, hp1, -alf, deep, N=25, bound_radius=3, k = 0)
-    #line1 = line1.rotate((0, 0, 0), (0, 0, 1),  90/nn)
-    lines0 = multi_disc_comp(line0, nn)
-    #lines1 = multi_disc_comp(line1, nn)
-    combined = lines0#.fuse(lines1)
-    return combined    
-    
+   
 
 def candy_bowl():
     r = 1
@@ -189,8 +174,6 @@ def candy_bowl():
     hp1 = 0.3
     dline0 = pattern3(res.val(), hp0, hp1, n, 1)
     dline1 = pattern4(res.val(), n)
-    #dline2 = pattern5(res.val(), hp0, 0.09, 80, 0.01)
-    
     res = res.faces(">Z").shell(-w)
 
 
@@ -206,26 +189,17 @@ def candy_bowl():
             .loft().translate((0, 0, h0-d)).val()
         )
     res = res.cut(path)
-
-
-    
-    
     res = res.fillet(0.4*w)
+
     r2 = math.sqrt(r*r - h*h) * 0.95
-    
     res = res.cut(dline0)
     res = res.cut(dline1)
-    
-    
     disc0 = pattern0(r2, h) 
     res = res.cut(disc0)   
-    
     disc1 = pattern1(r, n) 
     res = res.cut(disc1)   
     disc2 = pattern2(r, n)
     res = res.cut(disc2)
-
-
     
     ass = cq.Assembly()
     ass.add(res)

@@ -69,36 +69,6 @@ def diamond_line(sol, h0, h1, alf_shift, deep, N = 100, bound_radius = 100, k = 
     )
     return result.val()    
 
-def pattern0(r2, h):
-    nn = 13
-    nns = 5
-    alf = math.tau/nn
-    norm2 = np.array([0, 0, -1])
-    pa = np.array([r2, 0, -h])
-    pb = np.array([r2*math.cos(nns*alf), r2*math.sin(nns*alf), -h])
-    disc = diamond_disc(pa, pb, norm2, 0.05, math.pi/3).val()
-    discs = [disc.rotate((0, 0, 0), (0, 0, 1), 360 / nn * i) for i in range(nn)]
-    combined_discs = discs[0]
-    for d in discs[1:]:
-        combined_discs = combined_discs.fuse(d)
-    return combined_discs
-
-
-def wave2 (n, r = 1, a = math.pi/4):
-    def fn(t, n, r, d):
-        r1 = r + d*r*math.sin(t*n)
-        return (r1*math.cos(t), r1*math.sin(t))
-    
-    nn = 200
-    d = 0.2
-    h = r/math.tan(a)
-    p = [fn (math.tau*i/nn, n, r, 0.1)  for i in range(nn)]
-    res = cq.Workplane("XY").spline(p).close().workplane(offset=h).circle(0.01).loft()
-    w = 2.0 * (r + d*r) + 0.5
-    box = cq.Workplane("XY").box(w, w, h + 0.5, centered=(True, True, False))
-    box = box.cut(res)
-    #show(box)
-    return box
 
 def intersect(sol, x, y, z):
     line = cq.Edge.makeLine(cq.Vector(x, y, z), cq.Vector(0, 0, z))
@@ -133,6 +103,36 @@ def surf_normal(sol, z, alf, bound_radius = 100):
 
 
     
+def pattern0(r2, h):
+    nn = 13
+    nns = 5
+    alf = math.tau/nn
+    norm2 = np.array([0, 0, -1])
+    pa = np.array([r2, 0, -h])
+    pb = np.array([r2*math.cos(nns*alf), r2*math.sin(nns*alf), -h])
+    disc = diamond_disc(pa, pb, norm2, 0.05, math.pi/3).val()
+    discs = [disc.rotate((0, 0, 0), (0, 0, 1), 360 / nn * i) for i in range(nn)]
+    combined_discs = discs[0]
+    for d in discs[1:]:
+        combined_discs = combined_discs.fuse(d)
+    return combined_discs
+
+
+def wave2 (n, r = 1, a = math.pi/4):
+    def fn(t, n, r, d):
+        r1 = r + d*r*math.sin(t*n)
+        return (r1*math.cos(t), r1*math.sin(t))
+    
+    nn = 200
+    d = 0.2
+    h = r/math.tan(a)
+    p = [fn (math.tau*i/nn, n, r, 0.1)  for i in range(nn)]
+    res = cq.Workplane("XY").spline(p).close().workplane(offset=h).circle(0.01).loft()
+    w = 2.0 * (r + d*r) + 0.5
+    box = cq.Workplane("XY").box(w, w, h + 0.5, centered=(True, True, False))
+    box = box.cut(res)
+    #show(box)
+    return box
     
 
 def vase4():
@@ -230,7 +230,7 @@ def vase4():
     
     sh = x_coords[2]  # start diamond
     h = x_coords[-1]*0.9 # stop diamond
-    line = diamond_line(res.val(), sh, h, 0, 0.5)
+    line = diamond_line(res.val(), sh, h, 0, 2)
     line = line.rotate((0, 0, 0), (0, 0, 1), 180/ng)
     combined_discs = combined_discs.fuse(line)
 
