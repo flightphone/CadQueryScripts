@@ -3,6 +3,10 @@ from ocp_vscode import show
 import math
 import numpy as np
 
+def multi_disc_comp(combined_discs, n2):
+    discs2 = [combined_discs.rotate((0, 0, 0), (0, 0, 1), i*360/n2)  for i in range(n2)]
+    combined_discs2 = cq.Compound.makeCompound(discs2)
+    return combined_discs2   
 
 def diamond_disc(a, b, norm, d = 0.1, alf = math.pi/3):
     # a, b - ends of a segment
@@ -34,6 +38,36 @@ def diamond_disc(a, b, norm, d = 0.1, alf = math.pi/3):
     sp2 = cq.Workplane(pl).workplane(offset=-offs).sphere(r2)
     res = sp1.intersect(sp2)
     return res
+
+
+def diamond_line(sol, h0, h1, alf_shift, deep, N = 100, bound_radius = 100, k = 0.0):
+    def helix(t):
+        z = h0 + t*(h1 - h0)
+        alf = alf_shift * t
+        x = bound_radius*math.cos(alf)
+        y = bound_radius*math.sin(alf)
+
+        d = (t - 0.5)*2
+        d = d*d*deep/2 + k*(1-t)*(1-t)*(1-t)*deep
+
+        line = cq.Edge.makeLine(cq.Vector(x, y, z), cq.Vector(0, 0, z))
+        intersections = sol.intersect(line)
+        if intersections:
+            return intersections.Vertices()[0].X + math.cos(alf)*d, intersections.Vertices()[0].Y + math.sin(alf)*d, intersections.Vertices()[0].Z
+        else:
+            return (x, y, z)
+    path = cq.Workplane("XY").parametricCurve(helix, N=N, start=0, stop = 1)    
+    h = 0.001
+    a = helix(0)
+    b = helix(h)
+    norm = (b[0]-a[0], b[1]- a[1], b[2]-a[2])
+    pl = cq.Plane(origin=a, normal= norm)
+    result = (
+        cq.Workplane(pl) 
+        .polygon(4, deep)     
+        .sweep(path, isFrenet=False) 
+    )
+    return result.val()    
 
 def pattern0(r2, h):
     nn = 13
@@ -116,8 +150,6 @@ def vase4():
         .revolve(360, (0, 0, 0), (1, 0, 0))
     )
     
-    sh = x_coords[2]  # start diamond
-    h = x_coords[-1]*0.98 # stop diamond
     
     
     
@@ -132,9 +164,7 @@ def vase4():
 
   
 
-    wv = wave2(nn, y_coords[-1], a=math.pi/3)
-    wv = wv.translate((0, 0, x_coords[-1]- 1.35)).rotate((0, 0, 0), (0, 0, 1), -90/nn)
-    # - 1.35  - empirical bias
+    
     
     #normal
     
@@ -168,39 +198,53 @@ def vase4():
         norm, _  = surf_normal(res.val(), z, alf)
         norms.append(norm)
 
+    discs = []  
 
-    discs = []        
-    '''
-    for i in range(nn):
-        j = (i + nna) % nn
-        a = pnts[i]
-        b = pnts[j]
-        norm = norms[i] + norms[j]
-        disc = diamond_disc(a, b, norm, 0.04).val()
-        discs.append(disc)
-    '''
+    def patt1():
+        ln0 = np.linalg.norm(pnts[nna] - pnts[0])
+        for i in range(nn):
+            j = (i + nna) % nn
+            a = pnts[i]
+            b = pnts[j]
+            ln1 = np.linalg.norm(b - a)
+            norm = norms[i] + norms[j]
+            disc = diamond_disc(a, b, norm, 0.04*ln0/ln1).val()
+            discs.append(disc)
+
     
-    a = pnts[0]
-    for i in range(1, nn):
-        b = pnts[i]
-        norm = norms[0] + norms[i]
-        disc = diamond_disc(a, b, norm, 0.02).val()
-        discs.append(disc)    
+    def patt2():
+        a = pnts[0]
+        for i in range(1, nn):
+            b = pnts[i]
+            norm = norms[0] + norms[i]
+            disc = diamond_disc(a, b, norm, 0.02).val()
+            discs.append(disc)    
     
+    patt2()
     combined_discs = discs[0]
     for d in discs[1:]:
         combined_discs = combined_discs.fuse(d)    
 
 
+    ng = 5
+    
+    sh = x_coords[2]  # start diamond
+    h = x_coords[-1]*0.9 # stop diamond
+    line = diamond_line(res.val(), sh, h, 0, 0.5)
+    line = line.rotate((0, 0, 0), (0, 0, 1), 180/ng)
+    combined_discs = combined_discs.fuse(line)
+
+    combined2 =  multi_disc_comp(combined_discs, ng)
+
+
 
     
-
-
-    
-    
+    wv = wave2(nn, y_coords[-1], a=math.pi/3)
+    wv = wv.translate((0, 0, x_coords[-1]- 1.35)).rotate((0, 0, 0), (0, 0, 1), -90/nn)
+    # - 1.35  - empirical bias
     res = res.faces(">Z").shell(-w)
     res = res.cut(wv)
-    res = res.edges().fillet(0.3*w)
+    res = res.edges().fillet(0.4*w)
 
     
 
@@ -208,18 +252,16 @@ def vase4():
     disc0 = pattern0(r2, 0) 
     res = res.cut(disc0)   
     
-    res = res.cut(combined_discs)
     
     
-    
-    bwcomp = cq.Compound.makeCompound([res.val()])   
+    res = res.cut(combined2)
     ass = cq.Assembly()
-    ass.add(bwcomp)
-    #ass.add(pnn)
+    ass.add(res)
+    #ass.add(line)
     return ass
 
 
 
 res = vase4()    
-res.save("./stl/vase2.glb")
+res.save("./stl/vase4.glb")
 show(res)
