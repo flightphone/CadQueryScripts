@@ -263,5 +263,5 @@ def vase4():
 
 
 res = vase4()    
-res.save("./stl/vase4.glb")
+#res.save("./stl/vase4.glb")
 show(res)
