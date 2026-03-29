@@ -1,7 +1,7 @@
 import numpy as np
 from PIL import Image
 
-def generate_vase_texture(res=1024, nn=8.0):
+def generate_vase_texture(res=2048, nn=8.0):
     # 1. Создаем сетку координат
     # y идет от 0 (низ) до 1 (верх), x от 0 до 1 (вокруг цилиндра)
     y_grid, x_grid = np.mgrid[0:1:complex(res), 0:1:complex(res)]

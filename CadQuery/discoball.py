@@ -32,10 +32,27 @@ def discoball():
     return res
     
 
-res = discoball()
-ass = cq.Assembly()
-ass.add(res)
-ass.export('./stl/disco.glb')
-show(ass)
+#res = discoball()
+#ass = cq.Assembly()
+#ass.add(res)
+#ass.export('./stl/disco.glb')
+#show(ass)
+
+def uv(p, h1, h2):
+    if (p[2] < h1 or p[2] > h2):
+        return None
+    
+    x = p[0]
+    y = p[1]
+    z = p[2]
+    a = ((math.atan2(y, x) + math.tau) % math.tau) / math.tau
+    b = (p[2] - h1) / (h2 - h1)
+    return (a, b)
+
+
+
+print(uv ((0, 1, 3), 0, 6))
+
+
     
 
