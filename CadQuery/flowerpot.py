@@ -13,7 +13,7 @@ def tadj_onion(r1, al):
 def flow():
     r = 1
     r2 = 0.5*r
-    h1 = -0.2*r
+    h1 = -0.8*r
     h2 = 2*r
     h = 0.9 * (h2 - h1)
     w = 0.02*r
@@ -32,6 +32,8 @@ def flow():
     ass = cq.Assembly(name="flowerpot")
     ass.add(res, name="body")
     ass.save("./stl/flowerpot2.glb")
+    cq.exporters.export(res, "./stl/flowerpot2.step", exportType="STEP")
+    cq.exporters.export(res, "./stl/flowerpot2.stl", exportType="STL")
 
     
 

@@ -9,7 +9,7 @@ def smoothstep(edge0, edge1, x):
 
 def generate_map(res=1024, nn=7.0):
     """
-    Генерирует Voronoi карту высот, аналогичную GLSL-шейдеру.
+    Генерирует  карту высот, аналогичную GLSL-шейдеру.
     """
     # 1. Настройка координат, аналогичная mainImage
     # Координаты p = (fragCoord) / iResolution.y.
@@ -21,7 +21,7 @@ def generate_map(res=1024, nn=7.0):
     
     y_grid, x_grid = np.mgrid[0:1:complex(res), 0:1:complex(res)]
     coords = np.stack([x_grid, y_grid], axis=-1) # shape (res, res, 2)
-    x, y = coords[..., 0], coords[..., 1]
+    
 
     a = np.radians(45)  # угол в радианах
     # Создаем матрицу поворота
@@ -35,7 +35,6 @@ def generate_map(res=1024, nn=7.0):
 
     # 2. Масштабирование 
     dd = 1./math.cos(a)/nn
-    rr = 0.2*dd
     scaled_coords = coords / dd
     
 
@@ -49,40 +48,22 @@ def generate_map(res=1024, nn=7.0):
     final_col_np = 1 - np.sum(dl**2, axis=-1)/dd/dd * 2
 
     
-        
-
-    for i in range(2):
-        for j in range(2):
-            g = np.array([float(i), float(j)])
-            corn = grid_coords*dd + g*dd  #координаты угла
-            ddl = coords - corn
-            lln = np.sum(ddl**2, axis=-1)
-            final_col_np = np.where(lln <= rr*rr, np.maximum(1. - lln/rr/rr, final_col_np), final_col_np)
-
-
+    final_col_np = final_col_np * smoothstep(0.1, 0.2, y_grid) * (1 - smoothstep(0.9, 0.95, y_grid)) 
     
-    final_col_np = final_col_np * smoothstep(0, 0.1, y) * (1 - smoothstep(0.9, 1, y)) 
-    
-    df = 0.2
-    final_col_np = final_col_np * ((1-smoothstep(0.5-df, 0.5, x)) +  smoothstep(0.5, 0.5 + df, x))
     return final_col_np
 
 # --- Параметры рендера ---
 # Разрешение для текстуры
 res = 1024
 # Масштаб 
-nn = 4.0
+nn = 6.0
 
 # Генерируем массив данных
 print("Генерация текстуры...")
 img_data =  generate_map(res=res, nn=nn)
 
+
+print("Сохранение в grid.png...")
 arr_uint8 = (img_data * 255.0).astype(np.uint8)
-
-print("Сохранение в rot2.png...")
-# Переводим в диапазон 0-65535 вместо 0-255
-arr_uint16 = (np.clip(img_data * 65535, 0, 65535)).astype(np.uint16)
-Image.fromarray(arr_uint16, mode='I;16').save("./stl/rot2.png")
-
-
+Image.fromarray(arr_uint8, mode='L').save("./stl/grid.png")
 print("Текстура сгенерирована успешно.")

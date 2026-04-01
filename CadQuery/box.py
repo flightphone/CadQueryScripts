@@ -7,7 +7,7 @@ res = res.edges("|Z").fillet(w/2)
 res = res.cut(
     cq.Workplane("XY").box(1, 1, 2)
 )
-cq.exporters.export(res, "./stl/box.stl")
+cq.exporters.export(res, "./stl/box3.step", exportType="STEP")
 show(res)
 #res2 = cq.Workplane("XY").box(1, 1, 1+w).faces(">Z").shell(-w/2)
 #ass = cq.Assembly(name = "box")
