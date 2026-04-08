@@ -117,14 +117,14 @@ def vase2():
 
     print(x_coords[0], x_coords[-1])
     
-    #ass = cq.Assembly(name="vase")
-    #ass.add(res.val(), name = "body")
-    #return ass
-    return res
+    ass = cq.Assembly(name="vase")
+    ass.add(res.val(), name = "body")
+    return ass
+    #return res
 
 
 
 res = vase2()    
 #cq.exporters.export(res, "./stl/vase_body.stl")
-#res.save("./stl/vase_body.glb")
+res.save("./stl/vase_body.glb")
 show(res)

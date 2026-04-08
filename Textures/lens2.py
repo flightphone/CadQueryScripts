@@ -59,7 +59,7 @@ def render1():
     # 2. Основной цикл (аналог mainImage)
     res_mask = np.zeros((res, res))
 
-    r0 = 0.95
+    r0 = 0.8
     num = 9
     angle_a = math.tau/num
     points = [r0 * np.array([np.cos(angle_a*i + math.pi/2), np.sin(angle_a*i + math.pi/2)]) for i in range(num)]

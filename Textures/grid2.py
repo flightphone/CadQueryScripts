@@ -45,7 +45,8 @@ def generate_map(res=1024, nn=7.0):
 
     # Предварительно задаем массив минимальных расстояний
     dl = coords - grid_center 
-    final_col_np = 1 - np.sum(dl**2, axis=-1)/dd/dd * 2
+    mm = np.sum(dl**2, axis=-1)
+    final_col_np = 1 - mm/dd/dd * 2
 
     
     #final_col_np = final_col_np * smoothstep(0., 0.05, y_grid) * (1 - smoothstep(0.95, 1., y_grid)) 

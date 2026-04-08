@@ -39,17 +39,12 @@ def generate_map(res=1024, nn=7.0):
     
 
     # 3. Voronoi расчет n = floor(scaled_coords);
-    grid_coords = np.floor(scaled_coords) # shape (res, res, 2)
+    grid_coords = np.floor(scaled_coords)*dd# + 0.5*dd# shape (res, res, 2)
+    x, y = coords[:, :, 0] - grid_coords[:, :, 0], coords[:, :, 1] - grid_coords[:, :, 1]
 
-    grid_center = grid_coords*dd + 0.5*dd
-
-    # Предварительно задаем массив минимальных расстояний
-    dl = coords - grid_center 
-    final_col_np = 1 - np.sum(dl**2, axis=-1)/dd/dd * 2
-
-    
-    #final_col_np = final_col_np * smoothstep(0., 0.05, y_grid) * (1 - smoothstep(0.95, 1., y_grid)) 
-    
+    pp = 0.05*dd
+    dp = 0.05*dd
+    final_col_np = smoothstep(pp, pp+dp, x) * (1 - smoothstep(dd-pp-dp, dd-pp, x))*smoothstep(pp, pp+dp, y) * (1 - smoothstep(dd-pp-dp, dd-pp, y))
     return final_col_np
 
 # --- Параметры рендера ---
@@ -63,7 +58,7 @@ print("Генерация текстуры...")
 img_data =  generate_map(res=res, nn=nn)
 
 
-print("Сохранение в grid.png...")
+print("Сохранение в grid5.png...")
 arr_uint8 = (img_data * 255.0).astype(np.uint8)
-Image.fromarray(arr_uint8, mode='L').save("./stl/grid2.png")
+Image.fromarray(arr_uint8, mode='L').save("./stl/grid5.png")
 print("Текстура сгенерирована успешно.")

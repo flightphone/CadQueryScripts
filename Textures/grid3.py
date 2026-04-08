@@ -45,10 +45,12 @@ def generate_map(res=1024, nn=7.0):
 
     # Предварительно задаем массив минимальных расстояний
     dl = coords - grid_center 
-    final_col_np = 1 - np.sum(dl**2, axis=-1)/dd/dd * 2
+    mm = np.sum(dl**2, axis=-1)
+    final_col_np = 1 - mm/dd/dd * 2
 
-    
-    #final_col_np = final_col_np * smoothstep(0., 0.05, y_grid) * (1 - smoothstep(0.95, 1., y_grid)) 
+    pp = 0.5
+    dp = 0.05
+    final_col_np = smoothstep(pp, pp+dp, final_col_np) 
     
     return final_col_np
 
@@ -63,7 +65,7 @@ print("Генерация текстуры...")
 img_data =  generate_map(res=res, nn=nn)
 
 
-print("Сохранение в grid.png...")
+print("Сохранение в grid3.png...")
 arr_uint8 = (img_data * 255.0).astype(np.uint8)
-Image.fromarray(arr_uint8, mode='L').save("./stl/grid2.png")
+Image.fromarray(arr_uint8, mode='L').save("./stl/grid3.png")
 print("Текстура сгенерирована успешно.")
