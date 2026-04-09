@@ -2,6 +2,7 @@ import numpy as np
 import pyvista as pv
 from svgpathtools import Path, Line, CubicBezier, parse_path
 import math
+from scipy.spatial import KDTree
 
 
 def vase():
@@ -102,6 +103,14 @@ def vase():
         point_normals=True,
        
     )
+
+    #sp = pv.Cylinder((0, 0, 3), radius= 0.5, height=10)
+    #surface_with_normals = surface_with_normals.clip_surface(sp, invert=False)
+    #surface_with_normals = surface_with_normals.clip((0, 0, 1), (0, 0, 4.))
+
+
+
+    
     
     #surface_with_normals.save("./stl/amf_model4.obj")
     
@@ -117,6 +126,76 @@ def vase():
     #p.add_mesh(grid1,  show_edges=True)
     p.show()
 
+
+
+
+
+
+def bridge_loops(points_inner, points_outer):
+    """
+    Создает меш-ленту между двумя наборами точек (окружностями).
+    Работает, даже если количество точек разное.
+    """
+    # 1. Выравниваем начало: найдем точку в outer, ближайшую к points_inner[0]
+    tree = KDTree(points_outer)
+    _, start_idx = tree.query(points_inner[0])
+    points_outer = np.roll(points_outer, -start_idx, axis=0)
+
+    # 2. Объединяем точки в один массив для меша
+    all_pts = np.vstack([points_inner, points_outer])
+    n_inner = len(points_inner)
+    n_outer = len(points_outer)
+
+    faces = []
+    
+    # 3. Алгоритм "двух указателей" для триангуляции
+    # Идем по обеим окружностям одновременно, соединяя их в ленту
+    i, j = 0, 0
+    while i < n_inner or j < n_outer:
+        # Текущие индексы в общем массиве
+        curr_i = i % n_inner
+        curr_j = (j % n_outer) + n_inner
+        
+        # Следующие индексы
+        next_i = (i + 1) % n_inner
+        next_j = ((j + 1) % n_outer) + n_inner
+        
+        # Выбираем, какой треугольник построить следующим, 
+        # чтобы "догнать" более длинную окружность
+        # (Упрощенно: шагаем по очереди или по соотношению длин)
+        if (i + 1) / n_inner <= (j + 1) / n_outer:
+            faces.append([3, curr_i, next_i, curr_j])
+            i += 1
+        else:
+            faces.append([3, curr_i, next_j, curr_j])
+            j += 1
+            
+        # Условие выхода, чтобы не зациклиться
+        if i >= n_inner and j >= n_outer:
+            break
+
+    return pv.PolyData(all_pts, faces=np.hstack(faces))
+
+def bri():
+    # --- ПРИМЕР ИСПОЛЬЗОВАНИЯ ---
+    # Допустим, вы получили pts_1 и pts_2 через .strip().points
+    # Для теста создадим две окружности с разным числом точек
+    theta_1 = np.linspace(0, 2*np.pi, 50, endpoint=False)
+    theta_2 = np.linspace(0, 2*np.pi, 80, endpoint=False)
+
+    pts_1 = np.c_[np.cos(theta_1), np.sin(theta_1), np.zeros(50)] * 0.5 # Внутренняя
+    pts_2 = np.c_[np.cos(theta_2), np.sin(theta_2), np.zeros(80)] * 1.0 # Внешняя
+
+    # Создаем "крышечку"
+    bridge_mesh = bridge_loops(pts_1, pts_2)
+
+    # Визуализация
+    pl = pv.Plotter()
+    pl.add_mesh(bridge_mesh, color="lightblue", show_edges=True, label="Локальная заплатка")
+    pl.add_points(pts_1, color="red", point_size=10)
+    pl.add_points(pts_2, color="green", point_size=10)
+    pl.add_legend()
+    pl.show()
 
 vase()   
 
