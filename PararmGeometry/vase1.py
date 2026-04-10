@@ -114,7 +114,7 @@ def vase():
     
     #surface_with_normals.save("./stl/amf_model4.obj")
     
-
+    '''
     tex = pv.read_texture("./stl/grid5.png")
     tex.repeat = True
 
@@ -125,6 +125,8 @@ def vase():
     #p.add_mesh(grid0,  show_edges=True)
     #p.add_mesh(grid1,  show_edges=True)
     p.show()
+    '''
+    return surface_with_normals
 
 
 
@@ -197,5 +199,5 @@ def bri():
     pl.add_legend()
     pl.show()
 
-vase()   
+#vase()   
 

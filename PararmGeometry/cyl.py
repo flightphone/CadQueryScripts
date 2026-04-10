@@ -63,7 +63,7 @@ def cyl():
     
     
 
-    tex_u = np.linspace(0, 1, res_u)*3
+    tex_u = np.linspace(0, 1, res_u)
     tex_v = np.linspace(1, 0, res_v)
     
     
@@ -83,20 +83,21 @@ def cyl():
     #sp = pv.Sphere(1.5)
     #surface_with_normals = surface_with_normals.clip_surface(sp, invert=False)
 
-    surface_with_normals.save("./stl/cyl_model.obj")
+    #surface_with_normals.save("./stl/cyl_model.obj")
 
-    tex = pv.read_texture("./stl/lens2.png")
-    tex.repeat = True
+    #tex = pv.read_texture("./stl/lens2.png")
+    #tex.repeat = True
 
     # Визуализация
-    p = pv.Plotter()
-    p.add_mesh(surface_with_normals, texture=tex, smooth_shading=True, show_edges=True)
+    #p = pv.Plotter()
+    #p.add_mesh(surface_with_normals, texture=tex, smooth_shading=True, show_edges=True)
     #p.add_mesh(grid0)
     #p.add_mesh(grid1)
-    p.show()
+    #p.show()
+    return surface_with_normals
 
 
 
 
-cyl()   
+#cyl()   
 
