@@ -85,10 +85,10 @@ def wave_cone(u, v):
     return x, y, z
 
 def wave_cone_think():
-    geom = surf_geom(wave_cone, vmin=0.3, vmax=1, res_u=200, res_v=50)
+    geom = surf_geom(wave_cone, vmin=0.2, vmax=1, res_u=200, res_v=50)
     geom = geom.clean(tolerance=0.001)
     geom = geom.fill_holes(hole_size=0.001)
-    geom = geom.extrude((0, 0, -0.5), capping=True)
+    geom = geom.extrude((0, 0, -1.5), capping=True)
     geom = geom.clean(tolerance=0.001)
     geom = geom.fill_holes(hole_size=0.001)
     geom = geom.compute_normals(
@@ -102,9 +102,15 @@ def wave_cone_think():
 
 
 def cylclear():
+    
     geom2 = cyl()
     geom2 = geom2.clean(tolerance=0.001)
     geom2 = geom2.fill_holes(hole_size=0.001)
+    geom2 = geom2.extract_surface()
+    geom2 = geom2.clean(tolerance=0.001)
+    geom2 = geom2.fill_holes(hole_size=0.001)
+    
+    
     return geom2
 
 
@@ -117,6 +123,10 @@ geom1 = vase()
 #geom2 = pv.Sphere(3)
 geom2 = wave_cone_think()
 
+geom1.save("./stl/vase4.obj")
+geom2.save("./stl/wave_cone4.obj")
+
+
 
 #geom1 = pv.Cube()
 #geom2 = pv.Sphere(radius=0.7, center=(0.5, 0.5, 0.5))
@@ -124,9 +134,7 @@ geom2 = wave_cone_think()
 geo = pv_boolean_difference(geom1, geom2)
 #geo = True
 if geo != None:
-    #geom.save("./stl/wave_cone3.obj")
-    #geom2.save("./stl/cyl3.obj")
     p.add_mesh(geo)
-    #p.add_mesh(geom1)
+    #p.add_mesh(geom1, texture = tex)
     #p.add_mesh(geom2)
     p.show()

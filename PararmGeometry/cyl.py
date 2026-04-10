@@ -59,7 +59,7 @@ def cyl():
 
 
     merged_grid = grid.extract_geometry()
-    merged_grid = merged_grid.merge(grid0).merge(grid1)
+    #merged_grid = merged_grid.merge(grid0).merge(grid1)
     
     
 
