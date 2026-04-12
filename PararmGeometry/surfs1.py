@@ -1,9 +1,57 @@
 import numpy as np
 import pyvista as pv
-from surfgeometry import surf_geom, surf_points
+from surfgeometry import surf_geom, surf_points, check_volume
 import math
 
+def fix_seam_after_clean(mesh):
+    """
+    Разрезает сетку по шву UV, если clean() уже объединил точки.
+    """
+    # 1. Получаем текущие UV координаты
+    uv = mesh.active_texture_coordinates.copy()
+    u = uv[:, 0]
+    
+    # 2. Инструменты для пересборки
+    new_points = list(mesh.points)
+    new_uv = list(uv)
+    
+    # Разбираем массив faces (формат [n, i1, i2, ..., n, j1, j2, ...])
+    faces = mesh.faces.reshape(-1, 4) # Работает для треугольников (3 + 1)
+    
+    modified = False
+    point_map = {} # (original_idx, target_u) -> new_idx
 
+    for i in range(len(faces)):
+        f_indices = faces[i, 1:]
+        u_face = u[f_indices]
+        
+        # Если разброс U велик, значит это шов (например, 0.99 и 0.01)
+        if np.max(u_face) - np.min(u_face) > 0.5:
+            modified = True
+            for j in range(3):
+                idx = f_indices[j]
+                # Если у вершины маленькое U, её нужно "перенести" в U+1
+                if u[idx] < 0.5:
+                    key = (idx, u[idx] + 1.0)
+                    if key not in point_map:
+                        # Создаем дубликат вершины в пространстве
+                        new_idx = len(new_points)
+                        new_points.append(mesh.points[idx])
+                        # Но с новым U
+                        new_uv.append([u[idx] + 1.0, uv[idx, 1]])
+                        point_map[key] = new_idx
+                    
+                    # Обновляем индекс в полигоне
+                    faces[i, j+1] = point_map[key]
+
+    if not modified:
+        return mesh
+
+    # 3. Собираем новую сетку (уже PolyData, так как StructuredGrid не позволит дубликатов)
+    new_mesh = pv.PolyData(np.array(new_points), faces.ravel())
+    new_mesh.active_texture_coordinates = np.array(new_uv)
+    
+    return new_mesh
 
 def cycl(U, V):
     R = 1.
@@ -27,8 +75,8 @@ def shell(u, v, b):
     return x, y, z
 
 def think_shell(umin = 0, umax = 1, vmin = 0, vmax = 1,  res_u = 50, res_v = 10, repeat_u=10, repeat_v=2):
-    points1 = surf_points(lambda u, v: shell(u, v, 2.5), umin, umax, vmin, vmax,  res_u, res_v)
-    points2 = surf_points(lambda u, v: shell(u, v, 2.3), umin, umax, vmin, vmax,  res_u, res_v)
+    points1, _, _ = surf_points(lambda u, v: shell(u, v, 2.5), umin, umax, vmin, vmax,  res_u, res_v)
+    points2, _, _ = surf_points(lambda u, v: shell(u, v, 2.3), umin, umax, vmin, vmax,  res_u, res_v)
     grid = pv.StructuredGrid()
     grid.points =  np.vstack((points1, points2))
     grid.dimensions = [res_u, res_v, 2]
@@ -111,7 +159,7 @@ def think_umbrella():
     repeat_v = 1
     
     
-    points1 = surf_points(lambda u, v: umbrella(u, v, nn), umin, umax, vmin, vmax,  res_u, res_v)
+    points1, _, _ = surf_points(lambda u, v: umbrella(u, v, nn), umin, umax, vmin, vmax,  res_u, res_v)
     points2 = points1.copy()*0.95
     grid = pv.StructuredGrid()
     grid.points =  np.vstack((points1, points2))
@@ -137,17 +185,24 @@ def think_umbrella():
 
 
 
-tex = pv.read_texture("./stl/grid2.png")
+tex = pv.read_texture("./stl/lines.png")
 tex.repeat = True
-#geom = surf_geom(cycl, 0, math.tau, 0, 3, repeat_u=3)
-#geom = think_shell(0, 14 * math.pi, 0, 2 * math.pi + 0.05, 300, 100, repeat_u=10, repeat_v=2)
+#geom = surf_geom(cycl, 0, math.tau, 0, 3, repeat_u=1, top = 3)
+#geom = think_shell(0, 14 * math.pi, 0, 2 * math.pi, 300, 100, repeat_u=10, repeat_v=2)
+#geom = surf_geom(lambda u, v: shell(u, v, 2.5), 0, 14 * math.pi, 0, 2 * math.pi, 300, 100, repeat_u=10, repeat_v=2)
 #geom.save("./stl/shell_model.obj")
-#geom = surf_geom(onion, res_u=500, res_v=50)
-#geom.save("./stl/onion_model.obj")
-#nn = 10
-#geom = surf_geom(lambda u, v: umbrella(u, v, nn), res_v=50, res_u=nn*50)
+#geom = surf_geom(onion, res_u=500, res_v=50, vmin=0.05, vmax=1, top = 1)
+#geom = geom.clean(tolerance=0.0001)
+#geom = geom.fill_holes(hole_size=1)
 
-geom = think_umbrella()
+#geom = fix_seam_after_clean(geom)
+#print(f"is volume: {check_volume(geom)}")
+#geom.save("./stl/onion_model2.obj")
+nn = 10
+geom = surf_geom(lambda u, v: umbrella(u, v, nn), res_v=50, res_u=nn*50)
+
+#geom = think_umbrella()
+'''
 geom = geom.extract_surface()
 geom = geom.clean()
 geom = geom.fill_holes(0.0001)
@@ -155,13 +210,13 @@ geom = geom.compute_normals(
         cell_normals=False,
         point_normals=True,
     )
-
+'''
 #geom = geom.extrude((0, 0, -0.3), capping=True)
 
-#geom.save("./stl/umbrella_model.obj")
+geom.save("./stl/umbrella_model2.obj")
 
 p = pv.Plotter()
-p.add_mesh(geom, texture=tex, smooth_shading=True, pbr=False)
+p.add_mesh(geom, texture = tex, smooth_shading=True)
 #p.export_gltf("./stl/umbrella_model1.glb")
 #p.show_bounds(grid='front', location='outer', all_edges=True)
 p.show()

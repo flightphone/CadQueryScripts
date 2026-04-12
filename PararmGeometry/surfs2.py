@@ -89,13 +89,13 @@ def wave_cone_think():
     geom = geom.clean(tolerance=0.001)
     geom = geom.fill_holes(hole_size=0.001)
     geom = geom.extrude((0, 0, -1.5), capping=True)
-    geom = geom.clean(tolerance=0.001)
-    geom = geom.fill_holes(hole_size=0.001)
+    #geom = geom.clean(tolerance=0.001)
+    #geom = geom.fill_holes(hole_size=0.001)
     geom = geom.compute_normals(
             cell_normals=False,
             point_normals=True,
         )
-    #geom = geom.translate((0, 0, 2.9))
+    
     geom = geom.rotate_x(180)
     geom = geom.translate((0, 0, 8.6))
     return geom
@@ -123,8 +123,8 @@ geom1 = vase()
 #geom2 = pv.Sphere(3)
 geom2 = wave_cone_think()
 
-geom1.save("./stl/vase4.obj")
-geom2.save("./stl/wave_cone4.obj")
+#geom1.save("./stl/vase4.obj")
+#geom2.save("./stl/wave_cone4.obj")
 
 
 
@@ -132,9 +132,10 @@ geom2.save("./stl/wave_cone4.obj")
 #geom2 = pv.Sphere(radius=0.7, center=(0.5, 0.5, 0.5))
 
 geo = pv_boolean_difference(geom1, geom2)
+geo.save("./stl/vase_wave.obj")
 #geo = True
 if geo != None:
-    p.add_mesh(geo)
+    p.add_mesh(geo, show_edges=True)
     #p.add_mesh(geom1, texture = tex)
     #p.add_mesh(geom2)
     p.show()
