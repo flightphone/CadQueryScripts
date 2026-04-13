@@ -41,7 +41,7 @@ def surf_geom(fn, umin = 0, umax = 1, vmin = 0, vmax = 1,  res_u = 100, res_v = 
          dv += 1
 
 
-    tex_u = np.linspace(0, 1, res_u)*repeat_u
+    tex_u = np.linspace(0.5, 1.5, res_u)*repeat_u 
     tex_v = np.linspace(0, 1, res_v + dv)*repeat_v
     
     tex_u, tex_v = np.meshgrid(tex_u, tex_v)
@@ -54,20 +54,83 @@ def surf_geom(fn, umin = 0, umax = 1, vmin = 0, vmax = 1,  res_u = 100, res_v = 
     return geom
 
 def to_trimesh(pv_mesh):
-        # Обязательно триангулируем и чистим перед конвертацией
+        # clean
         tri_mesh = pv_mesh.triangulate().clean()
         v = tri_mesh.points
-        # Форматируем грани из [3, v1, v2, v3...] в [[v1, v2, v3]...]
+        # create faces
         f = tri_mesh.faces.reshape(-1, 4)[:, 1:]
         return trimesh.Trimesh(vertices=v, faces=f)
 
 
 def check_volume(pv_mesh):
     tri = to_trimesh(pv_mesh)
-    # Заполняет плоские дыры
+    # fill
     tri.fill_holes()
-    # Исправляет ориентацию граней (лицо/изнанка)
+    # fix
     tri.fix_normals()
-    # Пытается сделать меш герметичным
+    # correct
     tri.process(validate=True)
     return tri.is_volume
+
+
+
+def pv_boolean_difference(target_pv, cutter_pv, transform_matrix=None):
+    """
+    (Difference) by Trimesh/Manifold.
+    :param target_pv: main mesh
+    :param cutter_pv: cutter mesh
+    :param transform_matrix: transorm matrix
+    :return:  pyvista.PolyData
+    """
+    
+    def to_trimesh(pv_mesh):
+        # triangulate
+        tri_mesh = pv_mesh.triangulate().clean()
+        v = tri_mesh.points
+        # generate faces
+        f = tri_mesh.faces.reshape(-1, 4)[:, 1:]
+        return trimesh.Trimesh(vertices=v, faces=f)
+
+    def tryclear(target):    
+       # fill
+        target.fill_holes()
+        # fix
+        target.fix_normals()
+        # correct
+        target.process(validate=True)
+    
+    # 1. to Trimesh
+    target_tri = to_trimesh(target_pv)
+    cutter_tri = to_trimesh(cutter_pv)
+
+
+
+    
+    
+    # 2. transform
+    if transform_matrix is not None:
+        cutter_tri.apply_transform(transform_matrix)
+
+    # 3. clear
+    tryclear(target_tri)
+    tryclear(cutter_tri)
+    
+    #print(f"Target is volume: {target_tri.is_volume}")
+    #print(f"Cutter is volume: {cutter_tri.is_volume}")
+
+    if not target_tri.is_volume or not cutter_tri.is_volume:
+        return None
+
+
+
+    # 4. boolean Manifold
+    # engine='manifold' 
+    result_tri = target_tri.difference(cutter_tri, engine='manifold')
+
+    # 5. to PyVista
+    v_out = result_tri.vertices
+    f_out = result_tri.faces
+    # create faces
+    faces_pv = np.column_stack((np.full(len(f_out), 3), f_out)).ravel()
+    
+    return pv.PolyData(v_out, faces_pv)
