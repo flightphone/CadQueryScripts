@@ -73,7 +73,7 @@ def ellips(u, v):
     
 
 
-tex = pv.read_texture("./stl/lens2.png")
+tex = pv.read_texture("./stl/grid.png")
 tex.repeat = True
 p = pv.Plotter()
 
@@ -82,10 +82,11 @@ p = pv.Plotter()
 #geom.save("./stl/wave_cone.obj")
 #geom = surf_geom(tube, vmin = 0.1, top=3)
 geom = surf_geom(ellips, vmin=1, vmax=0, top = 3, res_u=200, repeat_u=6)
-geom.save("./stl/candy_vase.obj")
+
 #p.show_bounds(grid='front', location='outer', all_edges=True)
 #geom = geom.clean(tolerance=0.001)
 #geom = geom.fill_holes(hole_size=0.001)
+#geom.save("./stl/candy_vase.obj")
 #print(check_volume(geom))
 p.add_mesh(geom, texture=tex, smooth_shading=True)
 #p.add_mesh(geom, smooth_shading=True)

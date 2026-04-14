@@ -12,7 +12,25 @@ def cycl(U, V):
     z = V
     return x, y, z
 
-
+def cycl2(u, v):
+    h = 2
+    U = u*math.tau
+    V = 1 - np.abs((0.5 - v)*2)
+    R = 1.
+    x = R * np.cos(U)
+    y = R * np.sin(U)
+    z = V*h
+    w = 0.5
+    w2 = 0.1
+    mask = v > 0.5
+    x[mask] = x[mask]*(1-w)
+    y[mask] = y[mask]*(1-w)
+    z[mask] = z[mask]*(1-w2) + w2*h
+    
+    #x = np.where(v < 0.5, x, x*(1-w))
+    #y = np.where(v < 0.5, y, y*(1-w))
+    #z = np.where(v < 0.5, z, z*(1-w2) + w2*h)
+    return x, y, z
 
 def shell(u, v, b): 
     a = 3 
@@ -43,13 +61,7 @@ def think_shell(umin = 0, umax = 1, vmin = 0, vmax = 1,  res_u = 50, res_v = 10,
     geom.active_texture_coordinates = uvcoord2
 
     #geom = geom.clean()
-    '''
-    geom = geom.compute_normals(
-        cell_normals=False,
-        point_normals=True,
-       
-    )
-    '''
+    
     return geom
 
 
@@ -136,15 +148,33 @@ def think_umbrella():
     )
     return geom
 
+def shell2(u, v): 
+    u = u * 7 * math.tau
+    vv = 1 - np.abs((0.5 - v)*2)
+    vv = vv *  math.tau
 
+    b1 = 2.5
+    b2 = 2.3
+    a = 3 
+    m = -0.1 
+    k = 2.5
+    b = np.where(v < 0.5, b1, b2)
+
+    x = np.exp(m * u) * np.cos(u) * (a + b * np.cos(vv))
+    y = np.exp(m * u) * np.sin(u) * (a + b * np.cos(vv))
+    z = np.exp(m * u) * (k * a + b * np.sin(vv))
+    h = k * a + b
+    z -= h / 2.
+    return x, y, z
 
 tex = pv.read_texture("./stl/lines.png")
 tex.repeat = True
-#geom = surf_geom(cycl, 0, math.tau, 0, 3, repeat_u=1, top = 3)
+geom = surf_geom(cycl2, top = 3)
+#print(check_volume(geom))
 #geom = think_shell(0, 14 * math.pi, 0, 2 * math.pi, 300, 100, repeat_u=10, repeat_v=2)
 #geom = surf_geom(lambda u, v: shell(u, v, 2.5), 0, 14 * math.pi, 0, 2 * math.pi, 300, 100, repeat_u=10, repeat_v=2)
 #geom.save("./stl/shell_model.obj")
-geom = surf_geom(onion, res_u=500, res_v=50, vmin=0.05, vmax=1, top = 1)
+#geom2 = surf_geom(onion, res_u=500, res_v=50, vmin=0.01, vmax=1, top = 1)
 #geom = geom.clean(tolerance=0.0001)
 #geom = geom.fill_holes(hole_size=1)
 
@@ -155,21 +185,13 @@ geom = surf_geom(onion, res_u=500, res_v=50, vmin=0.05, vmax=1, top = 1)
 #geom = surf_geom(lambda u, v: umbrella(u, v, nn), res_v=50, res_u=nn*50)
 
 #geom = think_umbrella()
-'''
-geom = geom.extract_surface()
-geom = geom.clean()
-geom = geom.fill_holes(0.0001)
-geom = geom.compute_normals(
-        cell_normals=False,
-        point_normals=True,
-    )
-'''
 #geom = geom.extrude((0, 0, -0.3), capping=True)
 
 #geom.save("./stl/umbrella_model2.obj")
 
+
 p = pv.Plotter()
-p.add_mesh(geom, texture = tex, smooth_shading=False)
-#p.export_gltf("./stl/shell_model3.glb")
+p.add_mesh(geom, texture = tex, smooth_shading=True)
+#p.add_mesh(geom2, texture = tex, smooth_shading=True)
 #p.show_bounds(grid='front', location='outer', all_edges=True)
 p.show()
