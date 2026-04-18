@@ -52,8 +52,8 @@ def ellips(u, v):
     vv = 1 - np.abs((0.5 - v)*2)
     #wave
     n = 6
-    ww = 0.1
-    vv = vv*(1 + ww*np.cos(n*u))/(1 + ww)
+    ww = 0.05
+    vv = vv*(1 + ww*np.cos(n*u) + ww*np.cos(n*u*15)/5)/(1 + ww)
     #wave
     vv = (vmin + vv*(vmax-vmin)) * math.pi
     a = 1.5
@@ -81,7 +81,7 @@ p = pv.Plotter()
 #geom = wave_cone_think()
 #geom.save("./stl/wave_cone.obj")
 #geom = surf_geom(tube, vmin = 0.1, top=3)
-geom = surf_geom(ellips, vmin=1, vmax=0, top = 3, res_u=200, repeat_u=6)
+geom = surf_geom(ellips, vmin=1, vmax=0, top = 3, res_u=300, repeat_u=6)
 
 #p.show_bounds(grid='front', location='outer', all_edges=True)
 #geom = geom.clean(tolerance=0.001)
