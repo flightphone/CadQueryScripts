@@ -3,7 +3,14 @@ import pyvista as pv
 from surfgeometry import surf_geom, surf_points, check_volume
 import math
 
-
+def radial_uv(mesh):
+    uv = mesh.active_texture_coordinates
+    r = 0.5
+    x = uv[:, 0]*math.tau
+    y = (uv[:, 1] - 1)*r
+    X = y * np.cos(x)
+    Y = y * np.sin(x)
+    mesh.active_texture_coordinates = np.column_stack((Y, X))
 
 def cycl(U, V):
     R = 1.
@@ -167,9 +174,10 @@ def shell2(u, v):
     z -= h / 2.
     return x, y, z
 
-tex = pv.read_texture("./stl/lines.png")
+tex = pv.read_texture("./stl/epicycloid_fancy.png")
 tex.repeat = True
 geom = surf_geom(cycl2, top = 3)
+radial_uv(geom)
 #print(check_volume(geom))
 #geom = think_shell(0, 14 * math.pi, 0, 2 * math.pi, 300, 100, repeat_u=10, repeat_v=2)
 #geom = surf_geom(lambda u, v: shell(u, v, 2.5), 0, 14 * math.pi, 0, 2 * math.pi, 300, 100, repeat_u=10, repeat_v=2)

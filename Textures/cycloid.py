@@ -37,8 +37,8 @@ def generate_map(res=1024):
     dists = dists.reshape(res, res)
     
     # 3. Отрисовка (черный фон, синяя линия)
-    final_col_np = np.zeros((res, res, 3))
-    red_color = np.array([0.6, 0.6, 1.0])
+    final_col_np = np.ones((res, res, 3))
+    red_color = np.array([0.2, 0.2, 1.0])
     
     # Толщина линии (в единицах координат)
 

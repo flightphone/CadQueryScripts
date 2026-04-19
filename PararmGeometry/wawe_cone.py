@@ -3,6 +3,15 @@ import pyvista as pv
 from surfgeometry import surf_geom, pv_boolean_difference, check_volume
 import math
 
+def radial_uv(mesh):
+    uv = mesh.active_texture_coordinates
+    r = 0.25
+    x = uv[:, 0]*math.tau
+    y = 1 - np.abs((0.5 - np.clip(uv[:, 1], 0.5, 1))*2)
+    y = y*0.5
+    X = np.clip(y * np.cos(x) + 0.5, 0, 1)
+    Y = np.clip(y * np.sin(x) + 0.5, 0, 1)
+    mesh.active_texture_coordinates = np.column_stack((X, Y))
 
 
 def wave_cone(u, v):
@@ -53,13 +62,13 @@ def ellips(u, v):
     #wave
     n = 6
     ww = 0.05
-    vv = vv*(1 + ww*np.cos(n*u) + ww*np.cos(n*u*15)/5)/(1 + ww)
+    #vv = vv*(1 + ww*np.cos(n*u) + ww*np.cos(n*u*15)/5)/(1 + ww)
     #wave
     vv = (vmin + vv*(vmax-vmin)) * math.pi
-    a = 1.5
+    a = 1
     b = 1
     c = 1
-    w = 0.9
+    w = 0.95
 
     aa = np.where(v < 0.5, a, a*w)
     bb = np.where(v < 0.5, b, b*w)
@@ -73,7 +82,7 @@ def ellips(u, v):
     
 
 
-tex = pv.read_texture("./stl/grid.png")
+tex = pv.read_texture("./stl/epicycloid.png")
 tex.repeat = True
 p = pv.Plotter()
 
@@ -81,7 +90,11 @@ p = pv.Plotter()
 #geom = wave_cone_think()
 #geom.save("./stl/wave_cone.obj")
 #geom = surf_geom(tube, vmin = 0.1, top=3)
-geom = surf_geom(ellips, vmin=1, vmax=0, top = 3, res_u=300, repeat_u=6)
+geom = surf_geom(ellips, vmin=1, vmax=0, top = 3, res_u=300, repeat_u=1)
+radial_uv(geom)
+#geom = geom.clean(tolerance=0.001)
+#geom = geom.fill_holes(hole_size=0.001)
+
 
 #p.show_bounds(grid='front', location='outer', all_edges=True)
 #geom = geom.clean(tolerance=0.001)
