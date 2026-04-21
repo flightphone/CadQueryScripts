@@ -3,12 +3,12 @@ import pyvista as pv
 from surfgeometry import surf_geom, pv_boolean_difference, check_volume
 import math
 
-def radial_uv(mesh):
+def radial_uv(mesh, r = 0.28):
     uv = mesh.active_texture_coordinates
-    r = 0.25
     x = uv[:, 0]*math.tau
     y = 1 - np.abs((0.5 - np.clip(uv[:, 1], 0.5, 1))*2)
-    y = y*0.5
+    y = (y*r + 0.5 - r)
+    #y = 0.5 - y*r
     X = np.clip(y * np.cos(x) + 0.5, 0, 1)
     Y = np.clip(y * np.sin(x) + 0.5, 0, 1)
     mesh.active_texture_coordinates = np.column_stack((X, Y))
@@ -56,7 +56,7 @@ def tube(u, v):
 
 def ellips(u, v):
     vmin = 0.15
-    vmax = 0.65
+    vmax = 0.45
     u = u*math.tau
     vv = 1 - np.abs((0.5 - v)*2)
     #wave
@@ -82,7 +82,7 @@ def ellips(u, v):
     
 
 
-tex = pv.read_texture("./stl/epicycloid.png")
+tex = pv.read_texture("./stl/lens3.png")
 tex.repeat = True
 p = pv.Plotter()
 
@@ -90,8 +90,8 @@ p = pv.Plotter()
 #geom = wave_cone_think()
 #geom.save("./stl/wave_cone.obj")
 #geom = surf_geom(tube, vmin = 0.1, top=3)
-geom = surf_geom(ellips, vmin=1, vmax=0, top = 3, res_u=300, repeat_u=1)
-radial_uv(geom)
+geom = surf_geom(ellips, vmin=1, vmax=0, res_u=100, res_v = 50, repeat_u=1)
+radial_uv(geom, 0.3)
 #geom = geom.clean(tolerance=0.001)
 #geom = geom.fill_holes(hole_size=0.001)
 
@@ -99,7 +99,7 @@ radial_uv(geom)
 #p.show_bounds(grid='front', location='outer', all_edges=True)
 #geom = geom.clean(tolerance=0.001)
 #geom = geom.fill_holes(hole_size=0.001)
-#geom.save("./stl/candy_vase.obj")
+#geom.save("./stl/piale.obj")
 #print(check_volume(geom))
 p.add_mesh(geom, texture=tex, smooth_shading=True)
 #p.add_mesh(geom, smooth_shading=True)

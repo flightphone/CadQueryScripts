@@ -41,7 +41,7 @@ def surf_geom(fn, umin = 0, umax = 1, vmin = 0, vmax = 1,  res_u = 100, res_v = 
          dv += 1
 
 
-    tex_u = np.linspace(0.5, 1.5, res_u)*repeat_u 
+    tex_u = np.linspace(0, 1, res_u)*repeat_u 
     tex_v = np.linspace(0, 1, res_v + dv)*repeat_v
     
     tex_u, tex_v = np.meshgrid(tex_u, tex_v)
