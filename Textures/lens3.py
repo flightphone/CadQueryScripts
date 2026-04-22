@@ -11,6 +11,17 @@ def length(vec_array):
     # Вычисляет длину векторов для каждого пикселя
     return np.sqrt(np.sum(vec_array**2, axis=-1))
 
+def diamond_line(p, a, b, d = 0.02, r = 0.1):
+    ab = b - a
+    l = np.linalg.norm(ab)
+    v = p - a
+    h = d*l
+    dist = np.abs((v[..., 0] * ab[1] - v[...,1] * ab[0])/l)  #псевдоскалярное произведение
+    t = np.clip((v[..., 0] * ab[0] + v[...,1] * ab[1])/l/l, 0, 1)
+    sh = smoothstep(0, r, t)*(1 - smoothstep(1-r, 1, t))
+    res = np.clip((h*sh - dist)/h, 0, 1)
+    return res
+
 def lens(p, a, b, d):
     c = (a + b) / 2.0
     norm_vec = b - a
@@ -42,16 +53,41 @@ def lens(p, a, b, d):
     
     return flens(p)
 
+def npcross(r, s):
+    return r[0]*s[1] - r[1]*s[0]
 
-def render1():
-    # --- Настройки рендера ---
-    res = 1024
-    block_size = 16
+
+def intersect(a, b, c, d):
+    #google AI
+    # Направляющие векторы
+    r = b - a
+    s = d - c
     
+    # Знаменатель для поиска точки (векторное произведение направляющих векторов)
+    denom =  npcross(r, s)
+    
+    # Если denom == 0, отрезки параллельны
+    if denom == 0:
+        return None
+
+    # Параметры t и u для уравнений прямых: 
+    # P(t) = a + t*r
+    # Q(u) = c + u*s
+    t = npcross(c - a, s) / denom
+    u = npcross(c - a, r) / denom
+
+    # Отрезки пересекаются, если 0 <= t <= 1 и 0 <= u <= 1
+    if 0 <= t <= 1 and 0 <= u <= 1:
+        return a + t * r
+    
+    return None # Пересечения в пределах отрезков нет    
+
+def render():
+    res = 2048
 
     # 1. Создаем сетку координат p (аналог fragCoord)
     # Диапазон от -1 до 1 по обеим осям
-    y_grid, x_grid = np.mgrid[-1:1:complex(res), -1:1:complex(res)]
+    y_grid, x_grid = np.mgrid[1:-1:complex(res), -1:1:complex(res)]
     p = np.stack([x_grid, y_grid], axis=-1)
     x, y = p[..., 0], p[..., 1]
     alf = (np.arctan2(y, x) + math.tau) % math.tau
@@ -61,7 +97,8 @@ def render1():
 
     
     #==============center star=====================
-    r0 = 0.4
+
+    r0 = 0.35
     num = 26
     loop = math.tau/num
     angle = -np.floor((alf+loop/2)/loop)*loop
@@ -76,7 +113,9 @@ def render1():
         current_lens = lens(p1, a, b, 0.2)
         mask = current_lens > res_mask    # shape: (res, res)
         res_mask[mask] = current_lens[mask]
+        
     #==============center star=====================
+
 
     #==========radial==============================
     num2 = 7
@@ -85,30 +124,129 @@ def render1():
     X2 = x * np.cos(angle2) - y * np.sin(angle2)
     Y2 = x * np.sin(angle2) + y * np.cos(angle2)
     p2 = np.stack([X2, Y2], axis=-1)
-    r1 = 0.5
-    r2 = 0.98
+
+
+    angle3 = -np.floor(alf/loop2)*loop2 - loop2/2
+    X3 = x * np.cos(angle3) - y * np.sin(angle3)
+    Y3 = x * np.sin(angle3) + y * np.cos(angle3)
+    p3 = np.stack([X3, Y3], axis=-1)
+
+    # Создаем матрицу поворота
+    R = np.array([
+    [np.cos(loop2/2), -np.sin(loop2/2)],
+    [np.sin(loop2/2),  np.cos(loop2/2)]
+    ])
+
+
+    r1 = 0.55
+    r2 = 0.92
     a_points2 = [r1*np.array([math.cos(loop2/2), math.sin(loop2/2)]), r1*np.array([math.cos(-loop2/2), math.sin(-loop2/2)])]
     b_points2 = [r2*np.array([math.cos(-loop2/2), math.sin(-loop2/2)]), r2*np.array([math.cos(loop2/2), math.sin(loop2/2)])]
+    ins1 = intersect(a_points2[0], b_points2[0], a_points2[1], b_points2[1])
+    
+    
+    
     for a, b in zip(a_points2, b_points2):
-        current_lens = lens(p2, a, b, 0.07)
+        current_lens = diamond_line(p2, a, b, 0.02)
         mask = current_lens > res_mask    # shape: (res, res)
         res_mask[mask] = current_lens[mask]
+
+    
+    #косая 1
+    a_points3 = [a_points2[0] for _ in range(2)]
+    b_points3 = [a_points2[1] + (ins1 - a_points2[1])*(0.5 + i/4) for i in range(2)]
+    for a, b in zip(a_points3, b_points3):
+        current_lens = diamond_line(p2, a, b, 0.01)*0.5
+        mask = current_lens > res_mask    
+        res_mask[mask] = current_lens[mask]
+
+    #косая 2
+    a_points3 = [a_points2[1] for _ in range(2)]
+    b_points3 = [a_points2[0] + (ins1 - a_points2[0])*(0.5 + i/4) for i in range(2)]
+    for a, b in zip(a_points3, b_points3):
+        current_lens = diamond_line(p2, a, b, 0.01)*0.5
+        mask = current_lens > res_mask    
+        res_mask[mask] = current_lens[mask]    
+    
 
     r3 = (r1 + r2)/2
     points3 = [r1*np.array([math.cos(loop2/2), math.sin(loop2/2)]), r1*np.array([math.cos(-loop2/2), math.sin(-loop2/2)])]
-    a = np.array([r3, 0])
+    aa = np.array([r3, 0])
     for b in points3:
-        current_lens = lens(p2, a, b, 0.1)
+        current_lens = diamond_line(p2, aa, b, 0.04)
         mask = current_lens > res_mask    # shape: (res, res)
         res_mask[mask] = current_lens[mask]
 
+    
+    ins2 = intersect(a_points2[0], b_points2[0], a_points2[1], aa)
+    ins3 = np.array([ins2[0], -ins2[1]])
+    n4 = 15
+    a_points4 = [a_points2[1] + (ins2 - a_points2[1])*i/n4 for i in range(1, n4)]
+    b_points4 = [a_points2[1] + (ins1 - a_points2[1])*i/n4 for i in range(1, n4)]
+    for a, b in zip(a_points4, b_points4):
+        current_lens = diamond_line(p2, a, b, 0.07)*0.5
+        mask = current_lens > res_mask    
+        res_mask[mask] = current_lens[mask]    
+
+    a_points4 = [a_points2[0] + (ins3 - a_points2[0])*i/n4 for i in range(1, n4)]
+    b_points4 = [a_points2[0] + (ins1 - a_points2[0])*i/n4 for i in range(1, n4)]
+    for a, b in zip(a_points4, b_points4):
+        current_lens = diamond_line(p2, a, b, 0.07)*0.5
+        mask = current_lens > res_mask    
+        res_mask[mask] = current_lens[mask]        
+    
+    points = [ins1, (ins2 + ins1)/2, ins2, (ins2 + aa)/2, aa, (aa + ins3)/2, ins3, (ins1 + ins3)/2]    
+    for i in range(8):
+        j = (i + 3) % 8
+        current_lens = diamond_line(p2, points[i], points[j], 0.03)*0.5
+        mask = current_lens > res_mask    
+        res_mask[mask] = current_lens[mask]        
+
+    ins23 = ins2 @ R.T
+    ins33 = np.array([ins23[0], -ins23[1]])
+    v1 = np.array([r1, 0])
+    v2 = np.array([r2, 0])
+
+    n4 = 4
+    a_points4 = [v1 + (ins23 - v1)*i/n4 for i in range(1, n4)]
+    b_points4 = [ins33 + (v2 - ins33)*i/n4 for i in range(1, n4)]
+    for a, b in zip(a_points4, b_points4):
+        current_lens = diamond_line(p3, a, b, 0.02)
+        mask = current_lens > res_mask    
+        res_mask[mask] = current_lens[mask]   
+
+    
+    a_points4 = [v1 + (ins23 - v1)*(i/n4 + 1/2/n4) for i in range(n4)]
+    b_points4 = [ins33 + (v2 - ins33)*(i/n4 + 1/2/n4) for i in range(n4)]
+    for a, b in zip(a_points4, b_points4):
+        current_lens = diamond_line(p3, a, b, 0.01) * 0.5
+        mask = current_lens > res_mask    
+        res_mask[mask] = current_lens[mask]         
+
+    a_points4 = [v1 + (ins33 - v1)*i/n4 for i in range(1, n4)]
+    b_points4 = [ins23 + (v2 - ins23)*i/n4 for i in range(1, n4)]
+    for a, b in zip(a_points4, b_points4):
+        current_lens = diamond_line(p3, a, b, 0.02)
+        mask = current_lens > res_mask    
+        res_mask[mask] = current_lens[mask]     
+
+    a_points4 = [v1 + (ins33 - v1)*(i/n4 + 1/2/n4) for i in range(n4)]
+    b_points4 = [ins23 + (v2 - ins23)*(i/n4 + 1/2/n4) for i in range(n4)]
+    for a, b in zip(a_points4, b_points4):
+        current_lens = diamond_line(p3, a, b, 0.01) * 0.5
+        mask = current_lens > res_mask    
+        res_mask[mask] = current_lens[mask]                
+
+    
+    
+    #куст
     rr = 0.1
     num = 11
     angle_a = math.tau/num
     points = [rr * np.array([np.cos(angle_a*i), np.sin(angle_a*i)]) for i in range(num)]
-    points = points + a + np.array([rr, 0])
+    points = points + aa + np.array([rr, 0])
     for b in points:
-        current_lens = lens(p2, a, b, 0.2)
+        current_lens = lens(p2, aa, b, 0.2)
         mask = current_lens > res_mask    # shape: (res, res)
         res_mask[mask] = current_lens[mask]
 
@@ -116,11 +254,6 @@ def render1():
     arr_uint8 = (res_mask * 255).astype(np.uint8)
     img = Image.fromarray(arr_uint8, mode='L')
     img.save("./stl/lens3.png")
-
-    
-
-    
-    
     print("texture generate")
 
-render1()
+render()
