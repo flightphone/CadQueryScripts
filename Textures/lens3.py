@@ -11,7 +11,37 @@ def length(vec_array):
     # Вычисляет длину векторов для каждого пикселя
     return np.sqrt(np.sum(vec_array**2, axis=-1))
 
-def diamond_line(p, a, b, d = 0.02, r = 0.1):
+def diamond_line_AI(p, a, b, d = 0.02, r = 0.05): # r теперь по умолчанию маленький
+    #google AI
+    ab = b - a
+    l = np.linalg.norm(ab)
+    if l < 0.0001: return np.zeros(p.shape[:-1]) # защита от нулевых линий
+    
+    v = p - a
+    h = d * l
+    
+    # Расстояние до прямой (поперек)
+    dist = np.abs((v[..., 0] * ab[1] - v[..., 1] * ab[0]) / l)
+    
+    # Проекция на линию (вдоль, от 0 до 1)
+    t = np.clip((v[..., 0] * ab[0] + v[..., 1] * ab[1]) / (l * l), 0, 1)
+    
+    # Резкое затухание на концах (маска длины)
+    # Используем очень узкий smoothstep для имитации удара резца
+    edge_softness = r 
+    sh = smoothstep(0, edge_softness, t) * (1 - smoothstep(1 - edge_softness, 1, t))
+    
+    # ФОРМУЛА ГРАНИ:
+    # Вместо плавного (h-dist)/h используем линейный спад к краям
+    # Это создает визуальное "ребро"
+    res = np.clip(1.0 - (dist / (h * sh + 1e-6)), 0, 1)
+    
+    # Добавляем небольшую кривизну, чтобы свет "играл" на грани (опционально)
+    # res = np.power(res, 1.5) 
+    
+    return res
+
+def diamond_line(p, a, b, d = 0.02, r = 0.05):
     ab = b - a
     l = np.linalg.norm(ab)
     v = p - a
@@ -20,6 +50,7 @@ def diamond_line(p, a, b, d = 0.02, r = 0.1):
     t = np.clip((v[..., 0] * ab[0] + v[...,1] * ab[1])/l/l, 0, 1)
     sh = smoothstep(0, r, t)*(1 - smoothstep(1-r, 1, t))
     res = np.clip((h*sh - dist)/h, 0, 1)
+    #res = np.power(res, 1.5) 
     return res
 
 def lens(p, a, b, d):
@@ -235,9 +266,35 @@ def render():
     for a, b in zip(a_points4, b_points4):
         current_lens = diamond_line(p3, a, b, 0.01) * 0.5
         mask = current_lens > res_mask    
-        res_mask[mask] = current_lens[mask]                
+        res_mask[mask] = current_lens[mask]     
 
-    
+    a_points4 = [v1 + (ins33 - v1)*i/2/n4 for i in range(1, 2*n4)]
+    b_points4 = [v1 + (ins23 - v1)*i/2/n4 for i in range(1, 2*n4)]
+    for a, b in zip(a_points4, b_points4):
+        current_lens = diamond_line(p3, a, b, 0.02) * 0.5
+        mask = current_lens > res_mask    
+        res_mask[mask] = current_lens[mask]                 
+
+    a_points4 = [v2 + (ins33 - v2)*i/2/n4 for i in range(1, 2*n4)]
+    b_points4 = [v2 + (ins23 - v2)*i/2/n4 for i in range(1, 2*n4)]
+    for a, b in zip(a_points4, b_points4):
+        current_lens = diamond_line(p3, a, b, 0.02) * 0.5
+        mask = current_lens > res_mask    
+        res_mask[mask] = current_lens[mask]                     
+
+    a_points4 = [v2 + (ins33 - v2)*i/2/n4 for i in range(1, 2*n4)]
+    b_points4 = [v1 + (ins33 - v1)*i/2/n4 for i in range(1, 2*n4)]
+    for a, b in zip(a_points4, b_points4):
+        current_lens = diamond_line(p3, a, b, 0.02) * 0.5
+        mask = current_lens > res_mask    
+        res_mask[mask] = current_lens[mask]    
+
+    a_points4 = [v2 + (ins23 - v2)*i/2/n4 for i in range(1, 2*n4)]
+    b_points4 = [v1 + (ins23 - v1)*i/2/n4 for i in range(1, 2*n4)]
+    for a, b in zip(a_points4, b_points4):
+        current_lens = diamond_line(p3, a, b, 0.02) * 0.5
+        mask = current_lens > res_mask    
+        res_mask[mask] = current_lens[mask]        
     
     #куст
     rr = 0.1
