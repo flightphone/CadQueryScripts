@@ -12,13 +12,32 @@ def surf_points(fn, umin = 0, umax = 1, vmin = 0, vmax = 1,  res_u = 100, res_v 
     points = np.column_stack((x.ravel(), y.ravel(), z.ravel()))
     top_points = np.column_stack((x[0, :], y[0, :], z[0, :]))
     bottom_points = np.column_stack((x[-1, :], y[-1, :], z[-1, :]))
-
-    #top_points = np.column_stack((x[:, 0], y[:, 0], z[:, 0]))
-    #bottom_points = np.column_stack((x[:, -1], y[:, -1], z[:, -1]))
-
+    print(top_points.shape)
     return points, top_points, bottom_points
+
+def disk (points, res_v):
+    res_u = points.shape[0]
+    x = points[:,0]
+    y = points[:,1]
+    z = points[:,2]
     
-def surf_geom(fn, umin = 0, umax = 1, vmin = 0, vmax = 1,  res_u = 100, res_v = 100, repeat_u = 1, repeat_v = 1, top = 0):
+    v = np.linspace(0, 1, res_v)
+    X, V = np.meshgrid(x, v)
+    Y, _ = np.meshgrid(y, v)
+    Z, _ = np.meshgrid(z, v)
+    xr = X*V
+    yr = Y*V
+    zr = Z
+
+    points_d = np.column_stack((xr.ravel(), yr.ravel(), zr.ravel()))
+    grid = pv.StructuredGrid()
+    grid.points = points_d
+    grid.dimensions = [res_u, res_v, 1]
+    geom = grid.extract_geometry()
+    return geom
+
+
+def surf_geom2(fn, umin = 0, umax = 1, vmin = 0, vmax = 1,  res_u = 100, res_v = 100, repeat_u = 1, repeat_v = 1):
     
     points, top_points, bottom_points = surf_points(fn, umin, umax, vmin, vmax,  res_u, res_v)
     grid = pv.StructuredGrid()
@@ -26,6 +45,34 @@ def surf_geom(fn, umin = 0, umax = 1, vmin = 0, vmax = 1,  res_u = 100, res_v = 
     grid.dimensions = [res_u, res_v, 1]
 
     geom = grid.extract_geometry()
+    geom = geom.clean(tolerance=0.0001)
+    geom = geom.fill_holes(hole_size=0.0001)
+    
+    grid0 = disk(top_points, res_v)
+    geom = geom.merge(grid0, merge_points=False)
+    bottom_points2 = bottom_points[::-1]
+    grid1 = disk(bottom_points2, res_v)
+    geom = geom.merge(grid1, merge_points=False)     
+    
+    geom = geom.compute_normals(
+        cell_normals=False,
+        point_normals=True
+    )
+    
+    return geom
+
+    
+def surf_geom(fn, umin = 0, umax = 1, vmin = 0, vmax = 1,  res_u = 100, res_v = 100, repeat_u = 1, repeat_v = 1, top = 0, clear = False):
+    
+    points, top_points, bottom_points = surf_points(fn, umin, umax, vmin, vmax,  res_u, res_v)
+    grid = pv.StructuredGrid()
+    grid.points = points
+    grid.dimensions = [res_u, res_v, 1]
+
+    geom = grid.extract_geometry()
+    if clear:
+        geom = geom.clean(tolerance=0.0001)
+        geom = geom.fill_holes(hole_size=0.0001)
     
     dv = 0
     if (top & 1):
@@ -36,16 +83,16 @@ def surf_geom(fn, umin = 0, umax = 1, vmin = 0, vmax = 1,  res_u = 100, res_v = 
 
     if (top & 2):
          bottom_face = np.hstack([[res_u], np.arange(res_u)])
-         grid1 = pv.PolyData(bottom_points, faces=bottom_face)
+         grid1 = pv.PolyData(bottom_points[::-1], faces=bottom_face)
          geom = geom.merge(grid1, merge_points=False)     
          dv += 1
 
-
-    tex_u = np.linspace(0, 1, res_u)*repeat_u 
-    tex_v = np.linspace(0, 1, res_v + dv)*repeat_v
-    
-    tex_u, tex_v = np.meshgrid(tex_u, tex_v)
-    geom.active_texture_coordinates = np.column_stack((tex_u.ravel(), tex_v.ravel()))
+    if not clear:
+        tex_u = np.linspace(0, 1, res_u)*repeat_u 
+        tex_v = np.linspace(0, 1, res_v + dv)*repeat_v
+        
+        tex_u, tex_v = np.meshgrid(tex_u, tex_v)
+        geom.active_texture_coordinates = np.column_stack((tex_u.ravel(), tex_v.ravel()))
     
     geom = geom.compute_normals(
         cell_normals=False,

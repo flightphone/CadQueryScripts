@@ -149,7 +149,7 @@ def render():
 
 
     #==========radial==============================
-    num2 = 7
+    num2 = 6
     loop2 = math.tau/num2
     angle2 = -np.floor((alf+loop2/2)/loop2)*loop2
     X2 = x * np.cos(angle2) - y * np.sin(angle2)
@@ -208,7 +208,7 @@ def render():
         mask = current_lens > res_mask    # shape: (res, res)
         res_mask[mask] = current_lens[mask]
 
-    
+    #ребра
     ins2 = intersect(a_points2[0], b_points2[0], a_points2[1], aa)
     ins3 = np.array([ins2[0], -ins2[1]])
     n4 = 15
@@ -226,6 +226,7 @@ def render():
         mask = current_lens > res_mask    
         res_mask[mask] = current_lens[mask]        
     
+    #звезда
     points = [ins1, (ins2 + ins1)/2, ins2, (ins2 + aa)/2, aa, (aa + ins3)/2, ins3, (ins1 + ins3)/2]    
     for i in range(8):
         j = (i + 3) % 8
@@ -239,6 +240,7 @@ def render():
     v2 = np.array([r2, 0])
 
     n4 = 4
+    #ромб 1
     a_points4 = [v1 + (ins23 - v1)*i/n4 for i in range(1, n4)]
     b_points4 = [ins33 + (v2 - ins33)*i/n4 for i in range(1, n4)]
     for a, b in zip(a_points4, b_points4):
@@ -250,7 +252,7 @@ def render():
     a_points4 = [v1 + (ins23 - v1)*(i/n4 + 1/2/n4) for i in range(n4)]
     b_points4 = [ins33 + (v2 - ins33)*(i/n4 + 1/2/n4) for i in range(n4)]
     for a, b in zip(a_points4, b_points4):
-        current_lens = diamond_line(p3, a, b, 0.01) * 0.5
+        current_lens = diamond_line(p3, a, b, 0.015) * 0.5
         mask = current_lens > res_mask    
         res_mask[mask] = current_lens[mask]         
 
@@ -261,38 +263,40 @@ def render():
         mask = current_lens > res_mask    
         res_mask[mask] = current_lens[mask]     
 
+
     a_points4 = [v1 + (ins33 - v1)*(i/n4 + 1/2/n4) for i in range(n4)]
     b_points4 = [ins23 + (v2 - ins23)*(i/n4 + 1/2/n4) for i in range(n4)]
     for a, b in zip(a_points4, b_points4):
-        current_lens = diamond_line(p3, a, b, 0.01) * 0.5
+        current_lens = diamond_line(p3, a, b, 0.015) * 0.5
         mask = current_lens > res_mask    
         res_mask[mask] = current_lens[mask]     
 
+    #горизонталь в ромбе
     a_points4 = [v1 + (ins33 - v1)*i/2/n4 for i in range(1, 2*n4)]
     b_points4 = [v1 + (ins23 - v1)*i/2/n4 for i in range(1, 2*n4)]
     for a, b in zip(a_points4, b_points4):
-        current_lens = diamond_line(p3, a, b, 0.02) * 0.5
+        current_lens = diamond_line(p3, a, b, 0.015) * 0.5
         mask = current_lens > res_mask    
         res_mask[mask] = current_lens[mask]                 
 
     a_points4 = [v2 + (ins33 - v2)*i/2/n4 for i in range(1, 2*n4)]
     b_points4 = [v2 + (ins23 - v2)*i/2/n4 for i in range(1, 2*n4)]
     for a, b in zip(a_points4, b_points4):
-        current_lens = diamond_line(p3, a, b, 0.02) * 0.5
+        current_lens = diamond_line(p3, a, b, 0.015) * 0.5
         mask = current_lens > res_mask    
         res_mask[mask] = current_lens[mask]                     
 
     a_points4 = [v2 + (ins33 - v2)*i/2/n4 for i in range(1, 2*n4)]
     b_points4 = [v1 + (ins33 - v1)*i/2/n4 for i in range(1, 2*n4)]
     for a, b in zip(a_points4, b_points4):
-        current_lens = diamond_line(p3, a, b, 0.02) * 0.5
+        current_lens = diamond_line(p3, a, b, 0.015) * 0.5
         mask = current_lens > res_mask    
         res_mask[mask] = current_lens[mask]    
 
     a_points4 = [v2 + (ins23 - v2)*i/2/n4 for i in range(1, 2*n4)]
     b_points4 = [v1 + (ins23 - v1)*i/2/n4 for i in range(1, 2*n4)]
     for a, b in zip(a_points4, b_points4):
-        current_lens = diamond_line(p3, a, b, 0.02) * 0.5
+        current_lens = diamond_line(p3, a, b, 0.015) * 0.5
         mask = current_lens > res_mask    
         res_mask[mask] = current_lens[mask]        
     
@@ -306,6 +310,20 @@ def render():
         current_lens = lens(p2, aa, b, 0.2)
         mask = current_lens > res_mask    # shape: (res, res)
         res_mask[mask] = current_lens[mask]
+
+    
+    
+    
+    
+    #карта нормалей
+    gx, gy = np.gradient(res_mask, 2/(res-1))
+    ones = np.ones(p.shape[:2])
+    norm = np.stack([-gx, -gy, ones], axis=-1)
+    length_norm = np.sqrt((norm ** 2).sum(axis=-1, keepdims=True))
+    norm = norm / length_norm
+    norm = ((norm * 0.5 + 0.5) * 255).astype(np.uint8)
+    img_norm = Image.fromarray(norm)
+    img_norm.save("./stl/lens3_norm.png")
 
 
     arr_uint8 = (res_mask * 255).astype(np.uint8)

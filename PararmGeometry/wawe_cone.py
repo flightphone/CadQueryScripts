@@ -61,8 +61,9 @@ def ellips(u, v):
     vv = 1 - np.abs((0.5 - v)*2)
     #wave
     n = 6
-    ww = 0.05
+    ww = 0.08
     #vv = vv*(1 + ww*np.cos(n*u) + ww*np.cos(n*u*15)/5)/(1 + ww)
+    vv = vv*(1 + ww*np.cos(n*u))/(1 + ww)
     #wave
     vv = (vmin + vv*(vmax-vmin)) * math.pi
     a = 1
@@ -102,7 +103,7 @@ radial_uv(geom, 0.3)
 #geom.save("./stl/piale.obj")
 #print(check_volume(geom))
 p.add_mesh(geom, texture=tex, smooth_shading=True)
-#p.add_mesh(geom, smooth_shading=True)
+#p.add_mesh(geom)
 #geom2 = wave_cone_think()
 #geo = pv_boolean_difference(geom, geom2)
 #p.add_mesh(geo, smooth_shading=True)
