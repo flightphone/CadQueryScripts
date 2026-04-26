@@ -49,14 +49,24 @@ def generate_map(res=1024):
     final_col_np = np.full((res, res, 3), fill_value = [1, 1, 1], dtype=np.uint8)
     d = 0.004
     
-    grd1 = grd_fun(coords, FF)
+    dx = 2/(res - 1)
     field = FF(coords)
+    line = EE(coords)
+
+    #grd1 = grd_fun(coords, FF)
+    #grd2 = grd_fun(coords, EE)
+    gx, gy = np.gradient(field, dx)
+    grd1 = np.sqrt(gx**2 + gy**2)
+    gx, gy = np.gradient(line, dx)
+    grd2 = np.sqrt(gx**2 + gy**2)
+
+
     mask1 = smoothstep(d*grd1, 0, np.abs(field - np.floor(field) - 0.5))
     col1 = mix(final_col_np, np.array([1, 0, 0]), mask1[..., None])
     
     
-    grd2 = grd_fun(coords, EE)
-    line = EE(coords)
+    
+    
     mask2 = smoothstep(d*grd2, 0, np.abs(line - np.floor(line) - 0.5))
     col2 = mix(final_col_np, np.array([0, 0, 1]), mask2[..., None])
 
@@ -68,6 +78,8 @@ def generate_map(res=1024):
 def generate_map2(res=1024, t=0.0):
     y_grid, x_grid = np.mgrid[1:-1:complex(res), -1:1:complex(res)]
     coords = np.stack([x_grid, y_grid], axis=-1)
+
+
     
     # Фон теперь черный
     img = np.zeros((res, res, 3))
@@ -108,9 +120,9 @@ res = 1024
 
 
 print("generation texture...")
-img_data =  generate_map2(res=res)
+img_data =  generate_map(res=res)
 
-fname = "dipole2.png"
+fname = "dipole.png"
 print(f"save {fname}...")
 arr_uint8 = (img_data * 255.0).astype(np.uint8)
 Image.fromarray(arr_uint8).save(f"./stl/{fname}")

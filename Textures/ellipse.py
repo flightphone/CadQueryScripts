@@ -69,8 +69,16 @@ def sca(p):
 
 def gen_result(final_col_np, color, coords, fn):
     d = 0.005
-    grd = grd_fun(coords, fn)
-    mask = smoothstep(d*grd, 0, np.abs(fn(coords)))
+    dx = 2/(coords.shape[0] - 1)
+    
+    #grd = grd_fun(coords, fn)
+    field = fn(coords)
+    gx, gy = np.gradient(field, dx)
+    grd = np.sqrt(gx**2 + gy**2)
+
+
+    #mask = smoothstep(d*grd, 0, np.abs(fn(coords)))
+    mask = smoothstep(d*grd, 0, np.abs(field))
     final_col_np = mix(final_col_np, color, mask[..., None])
     return final_col_np
 
@@ -80,8 +88,8 @@ def generate_map(res=1024):
     coords = np.stack([x_grid, y_grid], axis=-1) # shape (res, res, 2)
     final_col_np = np.full((res, res, 3), fill_value = [0, 0, 0], dtype=np.uint8)
     color = np.array([0.7, 0.7, 1.0])
-    #final_col_np = gen_result(final_col_np, color, coords, sca)
-    final_col_np = gen_result(final_col_np, color, coords, gauss)
+    final_col_np = gen_result(final_col_np, color, coords, sca)
+    #final_col_np = gen_result(final_col_np, color, coords, gauss)
     return final_col_np
     
 
@@ -94,7 +102,7 @@ res = 1024
 print("generation texture...")
 img_data =  generate_map(res=res)
 
-fname = "gauss.png"
+fname = "sca1.png"
 print(f"save {fname}...")
 arr_uint8 = (img_data * 255.0).astype(np.uint8)
 Image.fromarray(arr_uint8).save(f"./stl/{fname}")

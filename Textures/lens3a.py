@@ -106,7 +106,7 @@ def intersect(a, b, c, d):
     return None # Пересечения в пределах отрезков нет    
 
 def render():
-    res = 4096
+    res = 1024
 
     # 1. Создаем сетку координат p (аналог fragCoord)
     # Диапазон от -1 до 1 по обеим осям
@@ -307,13 +307,7 @@ def render():
     
     
     
-    #карта нормалей
-    ao = create_ao(res_mask)
-    ao = (ao * 255).astype(np.uint8)
-    img_ao = Image.fromarray(ao)
-    img_ao.save("./stl/lens3aa_ao.png")
-
-    '''
+    
     gx, gy = np.gradient(res_mask, 2/(res-1))
     ones = np.ones(p.shape[:2])
     norm = np.stack([-gx, -gy, ones], axis=-1)
@@ -324,20 +318,20 @@ def render():
     
     #norm = create_normal_map(res_mask)
     img_norm = Image.fromarray(norm)
-    img_norm.save("./stl/lens3a_norm.png")
+    img_norm.save("./stl/lens33a_norm.png")
 
     
 
     ao2 = create_curvature(res_mask)
     ao2 = (ao2 * 255).astype(np.uint8)
     img_ao = Image.fromarray(ao2)
-    img_ao.save("./stl/lens3a_ao2.png")
+    img_ao.save("./stl/lens33a_ao2.png")
 
 
     arr_uint8 = (res_mask * 255).astype(np.uint8)
     img = Image.fromarray(arr_uint8, mode='L')
-    img.save("./stl/lens3a.png")
-    '''
+    img.save("./stl/lens33a_height.png")
+    
     print("textures generate")
 
 render()
