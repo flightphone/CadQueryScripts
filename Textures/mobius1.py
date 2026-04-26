@@ -9,7 +9,10 @@ def smoothstep(edge0, edge1, x):
 
 
 def qu(U):
-
+    dx = 2/(U.shape[0]-1)
+    #dy = 2/(U.shape[1]-1)
+    gx, gy = np.gradient(np.abs(U), dx)
+    grd = np.sqrt(gx**2 + gy**2)
     lines = U.real * 2
     lines2 = U.imag * 2
     
@@ -19,7 +22,7 @@ def qu(U):
     lines2 = lines2 - cells2
     
     sign = np.mod(cells + cells2, 2) * 2 - 1
-    hh = 0.02
+    hh = 0.003*grd
     r = (smoothstep(0., hh, lines) * (1 - smoothstep(1.-hh, 1., lines))*
                     smoothstep(0., hh, lines2) * (1 - smoothstep(1.-hh, 1., lines2))*
                     sign*0.5 + 0.5) 
@@ -37,7 +40,7 @@ def readimage():
     #res_v, res_u, _  = soa.shape
 
 
-    res = 4096
+    res = 2048
     u = np.linspace(-1, 1, res)
     v = np.linspace(-1, 1, res)
     u, v = np.meshgrid(u, v)
@@ -45,7 +48,7 @@ def readimage():
     U = u + 1j*v
 
     #U = 1 / (U + 1e-9)
-    U = np.log((U - 0.5) / (U + 0.5))
+    U = 1.5*np.log((U - 0.5) / (U + 0.5))
     #U = 1 / 0.5 * (U + 1e-9)
 
     #U = U * (1 + 4j/math.tau)
@@ -57,11 +60,11 @@ def readimage():
 
     # 1. Слегка размываем (sigma зависит от того, во сколько раз уменьшаем)
     # Для уменьшения в 2 раза sigma=0.5 — 1.0 будет достаточно
-    blurred = gaussian_filter(result, sigma=(1, 1, 0)) 
+    #blurred = gaussian_filter(result, sigma=(1, 1, 0)) 
 
     # 2. Уменьшаем
-    final_image = zoom(blurred, (0.5, 0.5, 1), order=3)
-
+    #final_image = zoom(blurred, (0.5, 0.5, 1), order=3)
+    final_image = result
     arr_uint8 = (final_image * 255).astype(np.uint8)
     img = Image.fromarray(arr_uint8)
     img.save("./stl/tex22_lm.png")
