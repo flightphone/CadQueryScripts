@@ -12,7 +12,6 @@ def surf_points(fn, umin = 0, umax = 1, vmin = 0, vmax = 1,  res_u = 100, res_v 
     points = np.column_stack((x.ravel(), y.ravel(), z.ravel()))
     top_points = np.column_stack((x[0, :], y[0, :], z[0, :]))
     bottom_points = np.column_stack((x[-1, :], y[-1, :], z[-1, :]))
-    print(top_points.shape)
     return points, top_points, bottom_points
 
 def disk (points, res_v):

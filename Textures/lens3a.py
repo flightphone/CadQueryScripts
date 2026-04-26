@@ -1,7 +1,29 @@
 import numpy as np
 import math
 from PIL import Image
-from scipy.ndimage import maximum_filter
+from scipy import ndimage
+
+def create_ao(height_map, radius=10, intensity=1.0):
+    # Размываем карту высот (имитируем распространение света)
+    blurred = ndimage.gaussian_filter(height_map, sigma=radius)
+    
+    # Находим разницу. Там, где оригинал ниже размытия — там впадина (тень)
+    ao = height_map - blurred
+    
+    # Нормализуем и усиливаем контраст
+    ao = np.clip(ao * intensity + 0.5, 0, 1)
+    
+    # Дополнительно можно применить кривую (gamma), чтобы углубить тени
+    ao = np.power(ao, 2.0) 
+    return ao
+
+def create_curvature(height_map):
+    # Фильтр Лапласа находит области резкого изменения высоты (впадины и пики)
+    laplacian = ndimage.laplace(height_map)
+    # Инвертируем, чтобы впадины стали темными
+    ao = np.clip(1.0 - laplacian, 0, 1)
+    return ao
+
 
 def smoothstep(edge0, edge1, x):
     t = np.clip((x - edge0) / (edge1 - edge0), 0.0, 1.0)
@@ -286,19 +308,36 @@ def render():
     
     
     #карта нормалей
+    ao = create_ao(res_mask)
+    ao = (ao * 255).astype(np.uint8)
+    img_ao = Image.fromarray(ao)
+    img_ao.save("./stl/lens3aa_ao.png")
+
+    '''
     gx, gy = np.gradient(res_mask, 2/(res-1))
     ones = np.ones(p.shape[:2])
     norm = np.stack([-gx, -gy, ones], axis=-1)
     length_norm = np.sqrt((norm ** 2).sum(axis=-1, keepdims=True))
     norm = norm / length_norm
-    norm = ((norm * 0.5 + 0.5) * 255).astype(np.uint8)
+    norm = (norm * 0.5 + 0.5)
+    norm = (norm * 255).astype(np.uint8)
+    
+    #norm = create_normal_map(res_mask)
     img_norm = Image.fromarray(norm)
-    img_norm.save("./stl/lens3_norm.png")
+    img_norm.save("./stl/lens3a_norm.png")
+
+    
+
+    ao2 = create_curvature(res_mask)
+    ao2 = (ao2 * 255).astype(np.uint8)
+    img_ao = Image.fromarray(ao2)
+    img_ao.save("./stl/lens3a_ao2.png")
 
 
     arr_uint8 = (res_mask * 255).astype(np.uint8)
     img = Image.fromarray(arr_uint8, mode='L')
-    img.save("./stl/lens3.png")
-    print("texture generate")
+    img.save("./stl/lens3a.png")
+    '''
+    print("textures generate")
 
 render()
