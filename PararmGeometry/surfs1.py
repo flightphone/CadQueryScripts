@@ -176,14 +176,14 @@ def shell2(u, v):
     z -= h / 2.
     return x, y, z
 
-tex = pv.read_texture("./stl/epicycloid_fancy.png")
+tex = pv.read_texture("./stl/narse2.png")
 tex.repeat = True
-geom = surf_geom(cycl2, top = 3)
-radial_uv(geom)
+#geom = surf_geom(cycl2, top = 3)
+#radial_uv(geom)
 #print(check_volume(geom))
-#geom = think_shell(0, 14 * math.pi, 0, 2 * math.pi, 300, 100, repeat_u=10, repeat_v=2)
+geom = think_shell(0, 14 * math.pi, 0, 2 * math.pi, 300, 100, repeat_u=10, repeat_v=2)
 #geom = surf_geom(lambda u, v: shell(u, v, 2.5), 0, 14 * math.pi, 0, 2 * math.pi, 300, 100, repeat_u=10, repeat_v=2)
-#geom.save("./stl/shell_model.obj")
+geom.save("./stl/shell_model.obj")
 #geom2 = surf_geom(onion, res_u=500, res_v=50, vmin=0.01, vmax=1, top = 1)
 #geom = geom.clean(tolerance=0.0001)
 #geom = geom.fill_holes(hole_size=1)
@@ -201,7 +201,7 @@ radial_uv(geom)
 
 
 p = pv.Plotter()
-p.add_mesh(geom, texture = tex, smooth_shading=True)
+p.add_mesh(geom, texture = tex)
 #p.add_mesh(geom2, texture = tex, smooth_shading=True)
 #p.show_bounds(grid='front', location='outer', all_edges=True)
 p.show()

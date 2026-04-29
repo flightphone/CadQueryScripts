@@ -23,7 +23,7 @@ def readimage():
     #U = 1 / (U + 1e-9)
     #U = np.log(U)
     U = np.log((U - 0.5) / (U + 0.5))
-    U = 2 * U * (1 + 6j/math.tau)
+    U = U * (1.114 + 4j/math.pi)
     
     U.real -= np.floor(U.real)
     U.imag -= np.floor(U.imag)
@@ -49,10 +49,11 @@ def readimage():
 
     # 1. Слегка размываем (sigma зависит от того, во сколько раз уменьшаем)
     # Для уменьшения в 2 раза sigma=0.5 — 1.0 будет достаточно
-    blurred = gaussian_filter(result, sigma=(1, 1, 0)) 
+    #blurred = gaussian_filter(result, sigma=(1, 1, 0)) 
 
     # 2. Уменьшаем
-    final_image = zoom(blurred, (0.5, 0.5, 1), order=3)
+    #final_image = zoom(blurred, (0.5, 0.5, 1), order=3)
+    final_image = result
 
 
 

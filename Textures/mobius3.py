@@ -21,13 +21,13 @@ def qu(U):
     lines = lines - cells
     lines2 = lines2 - cells2
     
-    sign = np.mod(cells + cells2, 2) * 2 - 1
-    #sign = np.mod(cells2, 2) * 2 - 1
+    #sign = np.mod(cells + cells2, 2) * 2 - 1
+    sign = np.mod(cells2, 2) * 2 - 1
     hh = 0.003*grd
     vsm = smoothstep(0., hh, lines) * (1 - smoothstep(1.-hh, 1., lines))
     hsm = smoothstep(0., hh, lines2) * (1 - smoothstep(1.-hh, 1., lines2))
     r = 1
-    r *= vsm
+    #r *= vsm
     r *= hsm
     r = r * sign*0.5 + 0.5
     
@@ -53,8 +53,9 @@ def readimage():
     U = u + 1j*v
 
     #U = 1 / (U + 1e-9)
-    U = 1.5*np.log((U - 0.5) / (U + 0.5))
-    #U = U * (1 + 3j/math.pi)
+    U = np.log((U - 0.5) / (U + 0.5))
+    #U = U * (1.511 + 3j/math.pi)  #+
+    U = U * (1.114 + 4j/math.pi)
     
     result = qu(U)
 
@@ -69,7 +70,7 @@ def readimage():
     final_image = result
     arr_uint8 = (final_image * 255).astype(np.uint8)
     img = Image.fromarray(arr_uint8)
-    img.save("./stl/tex22_lm.png")
+    img.save("./stl/tex23_lm.png")
     
     
     print("ok")
